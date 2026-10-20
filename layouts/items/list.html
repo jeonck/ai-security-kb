@@ -1,0 +1,11 @@
+{{ define "main" }}
+<header class="page-head">
+  <h1>{{ .Title }}</h1>
+  {{ with .Description }}<p class="lede">{{ . }}</p>{{ end }}
+</header>
+{{ $pag := .Paginate .Pages.ByDate.Reverse 20 }}
+<div class="item-list">
+{{ range $pag.Pages }}{{ partial "item-card.html" . }}{{ end }}
+</div>
+{{ partial "pager.html" $pag }}
+{{ end }}

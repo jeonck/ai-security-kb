@@ -1,136 +1,151 @@
 {{ define "main" }}
+{{- $items := (where site.RegularPages "Section" "items").ByDate.Reverse -}}
+{{- $state := site.Data.state -}}
 <article>
   <header class="page-head">
     <h1>{{ .Title }}</h1>
     {{ with .Description }}<p class="lede">{{ . }}</p>{{ end }}
+    <p class="muted">누적 {{ len $items }}건 · 마지막 수집 {{ $state.last_run }} · 1차 원문 확인 {{ len (where $items "Params.status" "confirmed") }}건</p>
   </header>
-  <div class="prose catalog" data-catalog>{{ .Content }}</div>
+  {{ with .Content }}<div class="prose">{{ . }}</div>{{ end }}
+
+  <div class="prose catalog" data-catalog>
+  <table>
+    <thead><tr><th>ID</th><th>날짜</th><th>생명주기</th><th>통제</th><th>제목</th><th>1차 출처</th><th>상태</th></tr></thead>
+    <tbody>
+    {{- range $items }}
+      {{- $prim := index (where .Params.sources "role" "primary") 0 | default (index .Params.sources 0) }}
+      <tr data-lc="{{ delimit .Params.lifecycle " " }}" data-ctl="{{ delimit .Params.controls " " }}" data-cat="{{ index .Params.categories 0 }}" data-status="{{ .Params.status }}">
+        <td class="mono"><a href="{{ .RelPermalink }}">{{ .Params.id }}</a></td>
+        <td class="mono">{{ .Date.Format "2006-01-02" }}</td>
+        <td>{{ range $i, $t := .GetTerms "lifecycle" }}{{ if $i }}, {{ end }}{{ $t.LinkTitle }}{{ end }}</td>
+        <td>{{ range $i, $t := .GetTerms "controls" }}{{ if $i }}, {{ end }}{{ $t.LinkTitle }}{{ end }}</td>
+        <td><a href="{{ .RelPermalink }}">{{ .Title }}</a></td>
+        <td><a href="{{ $prim.url }}">{{ $prim.outlet }}</a></td>
+        <td>{{ partial "status-badge.html" . }}</td>
+      </tr>
+    {{- end }}
+    </tbody>
+  </table>
+  </div>
+
+  {{- $fu := where $items "Params.followup" "!=" "" }}
+  <section class="block">
+    <h2 class="block-title">후속 추적 ({{ len $fu }})</h2>
+    <ul class="followups">
+    {{- range $fu }}
+      <li><a href="{{ .RelPermalink }}">{{ .Params.id }}</a> {{ .Params.followup }}</li>
+    {{- else }}<li class="muted">없음</li>{{ end }}
+    </ul>
+  </section>
+
+  {{- $weekly := (where site.RegularPages "Section" "weekly").ByDate.Reverse }}
+  <section class="block">
+    <h2 class="block-title">주간 리포트</h2>
+    <ul class="followups">
+    {{- range $weekly }}<li><a href="{{ .RelPermalink }}">{{ .Title }}</a> <span class="muted">{{ .Description }}</span></li>
+    {{- else }}<li class="muted">첫 주간 리포트는 2026-10-26 월요일 예정</li>{{ end }}
+    </ul>
+  </section>
 </article>
+{{- $lc := site.Data.axes.lifecycle }}{{ $ctl := site.Data.axes.controls }}{{ $cats := site.Data.axes.categories }}
 <script>
-// 전체 목록 표에 검색·카테고리 필터·페이징을 붙인다.
-// 원본 catalog.md는 그대로 마크다운 표이고, 스크립트가 꺼져 있으면 전체 표가 그대로 보인다.
+// 전체 목록: 검색 · 생명주기/통제/분류 필터 · 페이징. 스크립트가 꺼져 있으면 전체 표가 그대로 보인다.
 (function () {
+  var AX = {
+    lc: {{ $lc | jsonify | safeJS }},
+    ctl: {{ $ctl | jsonify | safeJS }},
+    cat: {{ $cats | jsonify | safeJS }}
+  };
   var root = document.querySelector('[data-catalog]');
   if (!root) return;
   var table = root.querySelector('table');
   if (!table || !table.tBodies.length) return;
-  var tbody = table.tBodies[0];
-  var rows = Array.prototype.slice.call(tbody.rows);
+  var rows = Array.prototype.slice.call(table.tBodies[0].rows);
   if (!rows.length) return;
-
   var PAGE_SIZE = 50;
   var params = new URLSearchParams(location.search);
-  var state = {
-    q: params.get('q') || '',
-    cat: params.get('cat') || '',
-    page: Math.max(1, parseInt(params.get('page') || '1', 10) || 1)
-  };
-
+  var state = { q: params.get('q') || '', lc: params.get('lc') || '', ctl: params.get('ctl') || '', cat: params.get('cat') || '',
+    page: Math.max(1, parseInt(params.get('page') || '1', 10) || 1) };
   var data = rows.map(function (tr) {
-    var c = tr.cells;
-    return {
-      tr: tr,
-      cat: c[1] ? c[1].textContent.trim() : '',
-      text: tr.textContent.toLowerCase()
-    };
+    return { tr: tr, lc: (tr.dataset.lc || '').split(' '), ctl: (tr.dataset.ctl || '').split(' '),
+      cat: tr.dataset.cat || '', text: tr.textContent.toLowerCase() };
   });
-
-  // 카테고리 목록 (건수 많은 순)
-  var counts = {};
-  data.forEach(function (d) { if (d.cat) counts[d.cat] = (counts[d.cat] || 0) + 1; });
-  var cats = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a] || a.localeCompare(b, 'ko'); });
-
-  // 컨트롤
+  function count(field, key) { return data.filter(function (d) { return field === 'cat' ? d.cat === key : d[field].indexOf(key) >= 0; }).length; }
+  function select(name, label, opts) {
+    var h = '<label class="cat-field"><span>' + label + '</span><select data-f="' + name + '"><option value="">전체</option>';
+    opts.forEach(function (o) { var n = count(name, o.key); if (n) h += '<option value="' + o.key + '">' + o.label + ' (' + n + ')</option>'; });
+    return h + '</select></label>';
+  }
   var bar = document.createElement('div');
   bar.className = 'cat-bar';
-  bar.innerHTML =
-    '<label class="cat-field"><span>검색</span><input type="search" placeholder="제목·카테고리·날짜" autocomplete="off"></label>' +
-    '<label class="cat-field"><span>카테고리</span><select><option value="">전체 (' + data.length + ')</option></select></label>' +
+  bar.innerHTML = '<label class="cat-field cat-search"><span>검색</span><input type="search" placeholder="제목·ID·출처·날짜" autocomplete="off"></label>' +
+    select('lc', '생명주기', AX.lc) + select('ctl', '통제 계층', AX.ctl) +
+    select('cat', '분류', AX.cat.map(function (c) { return { key: c, label: c }; })) +
     '<p class="cat-count" aria-live="polite"></p>';
   var input = bar.querySelector('input');
-  var select = bar.querySelector('select');
+  var sels = bar.querySelectorAll('select');
   var countEl = bar.querySelector('.cat-count');
-  cats.forEach(function (c) {
-    var o = document.createElement('option');
-    o.value = c; o.textContent = c + ' (' + counts[c] + ')';
-    select.appendChild(o);
-  });
   input.value = state.q;
-  select.value = cats.indexOf(state.cat) >= 0 ? state.cat : '';
-  state.cat = select.value;
-
+  sels.forEach(function (s) {
+    var f = s.dataset.f; s.value = state[f];
+    if (s.value !== state[f]) state[f] = '';
+    s.addEventListener('change', function () { state[f] = s.value; state.page = 1; render(); });
+  });
   var wrap = document.createElement('div');
   wrap.className = 'cat-table';
   table.parentNode.insertBefore(bar, table);
   table.parentNode.insertBefore(wrap, table);
   wrap.appendChild(table);
-
-  var pager = document.createElement('nav');
-  pager.className = 'pager';
-  pager.setAttribute('aria-label', '목록 페이지');
-  wrap.parentNode.insertBefore(pager, wrap.nextSibling);
-
   var empty = document.createElement('p');
-  empty.className = 'muted cat-empty';
-  empty.textContent = '조건에 맞는 항목이 없습니다.';
-  empty.hidden = true;
-  wrap.parentNode.insertBefore(empty, pager);
+  empty.className = 'muted cat-empty'; empty.textContent = '조건에 맞는 항목이 없습니다.'; empty.hidden = true;
+  wrap.parentNode.insertBefore(empty, wrap.nextSibling);
+  var pager = document.createElement('nav');
+  pager.className = 'pager'; pager.setAttribute('aria-label', '목록 페이지');
+  empty.parentNode.insertBefore(pager, empty.nextSibling);
 
   function filtered() {
     var q = state.q.trim().toLowerCase();
     return data.filter(function (d) {
-      return (!state.cat || d.cat === state.cat) && (!q || d.text.indexOf(q) >= 0);
+      return (!state.lc || d.lc.indexOf(state.lc) >= 0) && (!state.ctl || d.ctl.indexOf(state.ctl) >= 0) &&
+        (!state.cat || d.cat === state.cat) && (!q || d.text.indexOf(q) >= 0);
     });
   }
-
   function syncUrl() {
     var p = new URLSearchParams();
-    if (state.q) p.set('q', state.q);
-    if (state.cat) p.set('cat', state.cat);
+    ['q', 'lc', 'ctl', 'cat'].forEach(function (k) { if (state[k]) p.set(k, state[k]); });
     if (state.page > 1) p.set('page', String(state.page));
     var qs = p.toString();
     try { history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash); } catch (e) {}
   }
-
-  function btn(label, page, opts) {
+  function btn(label, page, o) {
     var b = document.createElement('button');
-    b.type = 'button';
-    b.textContent = label;
-    if (opts && opts.current) { b.setAttribute('aria-current', 'page'); b.className = 'is-current'; }
-    if (opts && opts.disabled) b.disabled = true;
-    if (opts && opts.aria) b.setAttribute('aria-label', opts.aria);
-    b.addEventListener('click', function () {
-      state.page = page; render();
-      wrap.scrollIntoView({ block: 'start', behavior: 'smooth' });
-    });
+    b.type = 'button'; b.textContent = label;
+    if (o.current) { b.setAttribute('aria-current', 'page'); b.className = 'is-current'; }
+    if (o.disabled) b.disabled = true;
+    if (o.aria) b.setAttribute('aria-label', o.aria);
+    b.addEventListener('click', function () { state.page = page; render(); wrap.scrollIntoView({ block: 'start', behavior: 'smooth' }); });
     return b;
   }
-
   function render() {
     var list = filtered();
     var pages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
     if (state.page > pages) state.page = pages;
     var start = (state.page - 1) * PAGE_SIZE;
     var shown = list.slice(start, start + PAGE_SIZE);
-    var visible = new Set(shown.map(function (d) { return d.tr; }));
-    data.forEach(function (d) { d.tr.hidden = !visible.has(d.tr); });
-
+    var vis = new Set(shown.map(function (d) { return d.tr; }));
+    data.forEach(function (d) { d.tr.hidden = !vis.has(d.tr); });
     empty.hidden = list.length > 0;
     countEl.textContent = list.length
       ? list.length + '건 중 ' + (start + 1) + '–' + (start + shown.length) + (list.length !== data.length ? ' (전체 ' + data.length + '건)' : '')
       : '0건 (전체 ' + data.length + '건)';
-
-    pager.innerHTML = '';
-    pager.hidden = pages <= 1;
+    pager.innerHTML = ''; pager.hidden = pages <= 1;
     if (pages > 1) {
       pager.appendChild(btn('‹ 이전', state.page - 1, { disabled: state.page === 1, aria: '이전 페이지' }));
       var last = 0;
       for (var i = 1; i <= pages; i++) {
         if (i === 1 || i === pages || Math.abs(i - state.page) <= 1) {
-          if (last && i - last > 1) {
-            var gap = document.createElement('span'); gap.className = 'pager-gap'; gap.textContent = '…';
-            pager.appendChild(gap);
-          }
+          if (last && i - last > 1) { var g = document.createElement('span'); g.className = 'pager-gap'; g.textContent = '…'; pager.appendChild(g); }
           pager.appendChild(btn(String(i), i, { current: i === state.page, aria: i + '페이지' }));
           last = i;
         }
@@ -139,14 +154,8 @@
     }
     syncUrl();
   }
-
   var t;
-  input.addEventListener('input', function () {
-    clearTimeout(t);
-    t = setTimeout(function () { state.q = input.value; state.page = 1; render(); }, 120);
-  });
-  select.addEventListener('change', function () { state.cat = select.value; state.page = 1; render(); });
-
+  input.addEventListener('input', function () { clearTimeout(t); t = setTimeout(function () { state.q = input.value; state.page = 1; render(); }, 120); });
   render();
 })();
 </script>

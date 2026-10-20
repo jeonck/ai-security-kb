@@ -1,18 +1,18 @@
 <div class="pipe" role="img" aria-label="AI 보안 리서치 조교 실행 흐름: 스케줄 실행, 코디네이터 준비, 4개 도메인 병렬 수집, 검증과 중복 제거, 기록과 검사, 커밋과 배포, 프로젝트 사본과 알림">
   <div class="pipe-step">
     <span class="pipe-no">1</span>
-    <div><b>스케줄 실행</b><span>6시간마다 (01·07·13·19시 19분 CT) 새 세션이 깨어난다</span></div>
+    <div><b>스케줄 실행</b><span>6시간마다 새 세션이 깨어난다</span></div>
   </div>
   <div class="pipe-arrow">↓</div>
   <div class="pipe-step">
     <span class="pipe-no">2</span>
-    <div><b>코디네이터 준비</b><span>날짜를 명령으로 확정 → 레포 클론 → <code>CLAUDE.md</code>(규칙)·<code>catalog.md</code>(이력) 읽기</span></div>
+    <div><b>코디네이터 준비</b><span>날짜를 명령으로 확정 → 레포 클론 → <code>CLAUDE.md</code>(규칙)·<code>state.yaml</code>(마지막 수집)·기존 항목 목록 읽기</span></div>
   </div>
   <div class="pipe-arrow">↓</div>
   <div class="pipe-step pipe-fan">
     <span class="pipe-no">3</span>
     <div>
-      <b>4개 도메인 병렬 수집</b><span>리서처 4명을 동시에 띄움. 각자 검색 → 원문 열어 발행일·사실 확인 → 노트 파일</span>
+      <b>4개 도메인 병렬 수집</b><span>리서처 4명을 동시에 띄움. 각자 검색 → 기사에서 1차 원문까지 추적 → 출처 서지·주장별 위치·두 축 태그를 채운 항목 파일</span>
       <div class="pipe-grid">
         <span>인젝션·에이전트</span><span>모델 공격 연구</span><span>공급망·데이터·악용</span><span>규제·표준·벤더</span>
       </div>
@@ -21,23 +21,23 @@
   <div class="pipe-arrow">↓</div>
   <div class="pipe-step">
     <span class="pipe-no">4</span>
-    <div><b>검증·중복 제거</b><span>catalog의 URL·같은 사건과 대조, 리서처 간 중복 병합, 기간 밖·근거 약한 후보 버림 → 최대 12건</span></div>
+    <div><b>검증·중복 제거</b><span><code>kb.py find</code>로 기존 항목과 대조, 리서처 간 중복 병합, 근거 약한 후보 버림, 두 축 태그 점검 → 최대 12건에 ID 부여</span></div>
   </div>
   <div class="pipe-arrow">↓</div>
   <div class="pipe-step">
     <span class="pipe-no">5</span>
-    <div><b>기록·검사</b><span><code>content/digest/</code>에 추가, catalog 갱신 → <code>scripts/check.sh</code>가 OK일 때만 다음 단계</span></div>
+    <div><b>기록·검사</b><span><code>content/items/</code>에 항목, <code>content/digest/</code>에 실행 기록 → <code>scripts/check.sh</code>(스키마·1차 출처 조건·중복·빌드)가 OK일 때만 다음 단계</span></div>
   </div>
   <div class="pipe-arrow">↓</div>
   <div class="pipe-split">
     <div class="pipe-step">
       <span class="pipe-no">6</span>
-      <div><b>커밋·푸시 → 배포</b><span>GitHub Actions가 다시 검사하고 Hugo로 빌드해 Pages에 배포</span></div>
+      <div><b>커밋·푸시 → 배포</b><span>GitHub Actions가 다시 검사하고 참고문헌을 만든 뒤 Hugo로 빌드해 Pages에 배포 — 매트릭스·목차 근거·전체 목록이 자동 갱신</span></div>
     </div>
     <div class="pipe-step">
       <span class="pipe-no">7</span>
       <div><b>사본·알림</b><span>claude.ai 프로젝트 "리서치"에 같은 문서 갱신, 새 항목이 있을 때만 푸시·이메일 알림</span></div>
     </div>
   </div>
-  <p class="pipe-note">새 자료가 0건이면 3단계 이후 아무 파일도 바꾸지 않고 "새 AI 보안 자료 없음" 한 줄로 끝난다. 레포에 닿지 못하면 프로젝트에만 쓰는 대체 모드로 돈다.</p>
+  <p class="pipe-note">새 자료가 0건이면 3단계 이후 아무 파일도 바꾸지 않고 "새 AI 보안 자료 없음" 한 줄로 끝난다. 레포에 닿지 못하면 아무것도 쓰지 않고 실패를 알린다.</p>
 </div>

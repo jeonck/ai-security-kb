@@ -1,0 +1,73 @@
+{{ define "main" }}
+{{- $items := where site.RegularPages "Section" "items" -}}
+{{- $lc := sort site.Data.axes.lifecycle "order" -}}
+{{- $ctl := sort site.Data.axes.controls "order" -}}
+{{- $catalog := "catalog/" | relURL -}}
+<header class="page-head">
+  <p class="eyebrow">BOOK · 집필 매트릭스</p>
+  <h1>{{ .Title }}</h1>
+  {{ with .Description }}<p class="lede">{{ . }}</p>{{ end }}
+</header>
+<div class="prose">{{ .Content }}</div>
+
+<div class="matrix-wrap">
+<table class="matrix">
+  <thead>
+    <tr>
+      <th class="mx-corner">생명주기 ↓ · 통제 →</th>
+      {{- range $ctl }}<th><a href="{{ (printf "controls/%s/" .key) | relURL }}" title="{{ .desc }}">{{ .label }}</a></th>{{ end }}
+      <th class="mx-total">합계</th>
+    </tr>
+  </thead>
+  <tbody>
+  {{- range $l := $lc }}
+    {{- $row := where $items "Params.lifecycle" "intersect" (slice $l.key) }}
+    <tr>
+      <th><a href="{{ (printf "lifecycle/%s/" $l.key) | relURL }}" title="{{ $l.desc }}">{{ $l.label }}</a></th>
+      {{- range $c := $ctl }}
+        {{- $cell := where $row "Params.controls" "intersect" (slice $c.key) }}
+        {{- $n := len $cell }}
+        <td class="mx-cell mx-{{ if eq $n 0 }}0{{ else if eq $n 1 }}1{{ else if lt $n 4 }}2{{ else }}3{{ end }}">
+          {{- if $n }}
+          <a class="mx-n" href="{{ $catalog }}?lc={{ $l.key }}&amp;ctl={{ $c.key }}" title="{{ $l.label }} × {{ $c.label }} 항목 보기">{{ $n }}</a>
+          <span class="mx-ids">{{ range $i, $it := first 4 $cell.ByDate.Reverse }}<a href="{{ $it.RelPermalink }}" title="{{ $it.Title }}">{{ replace $it.Params.id "AISEC-" "" }}</a>{{ end }}{{ if gt $n 4 }}<span>+{{ sub $n 4 }}</span>{{ end }}</span>
+          {{- else }}<span class="mx-empty" title="근거 없음 — 기초 문헌 수집 대상">·</span>{{ end }}
+        </td>
+      {{- end }}
+      <td class="mx-total">{{ len $row }}</td>
+    </tr>
+  {{- end }}
+  <tr class="mx-total-row">
+    <th>합계</th>
+    {{- range $c := $ctl }}<td class="mx-total">{{ len (where $items "Params.controls" "intersect" (slice $c.key)) }}</td>{{ end }}
+    <td class="mx-total">{{ len $items }}</td>
+  </tr>
+  </tbody>
+</table>
+</div>
+<p class="muted">한 항목은 생명주기 1~2개 × 통제 1~3개에 걸칠 수 있어 칸의 합이 전체 건수보다 클 수 있습니다. 숫자를 누르면 그 칸의 항목만 걸러진 전체 목록으로 갑니다.</p>
+
+{{- $empty := slice -}}
+{{- range $l := $lc }}{{ range $c := $ctl }}
+  {{- $n := len (where (where $items "Params.lifecycle" "intersect" (slice $l.key)) "Params.controls" "intersect" (slice $c.key)) }}
+  {{- if eq $n 0 }}{{ $empty = $empty | append (printf "%s × %s" $l.label $c.label) }}{{ end }}
+{{- end }}{{ end }}
+<section class="block">
+  <h2 class="block-title">빈 칸 {{ len $empty }}개 — 기초 문헌 수집 작업이 우선 채우는 곳</h2>
+  <div class="chips">{{ range $empty }}<span class="chip chip-empty">{{ . }}</span>{{ end }}</div>
+</section>
+
+<section class="block">
+  <h2 class="block-title">축 정의</h2>
+  <div class="prose">
+  <table>
+    <thead><tr><th>생명주기</th><th>범위</th></tr></thead>
+    <tbody>{{ range $lc }}<tr><td><b>{{ .label }}</b> <code>{{ .key }}</code></td><td>{{ .desc }}</td></tr>{{ end }}</tbody>
+  </table>
+  <table>
+    <thead><tr><th>통제 계층</th><th>범위</th></tr></thead>
+    <tbody>{{ range $ctl }}<tr><td><b>{{ .label }}</b> <code>{{ .key }}</code></td><td>{{ .desc }}</td></tr>{{ end }}</tbody>
+  </table>
+  </div>
+</section>
+{{ end }}

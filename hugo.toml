@@ -19,10 +19,13 @@ summaryLength = 40
 [taxonomies]
   tag = "tags"
   category = "categories"
+  lifecycle = "lifecycle"
+  control = "controls"
 
 [permalinks]
   digest = "/digest/:slug/"
   weekly = "/weekly/:slug/"
+  items = "/items/:filename/"
 
 [markup.goldmark.renderer]
   unsafe = false
@@ -49,10 +52,14 @@ summaryLength = 40
     pageRef = "/catalog"
     weight = 30
   [[menus.main]]
-    name = "카테고리"
-    pageRef = "/categories"
+    name = "집필"
+    pageRef = "/book"
     weight = 40
+  [[menus.main]]
+    name = "참고문헌"
+    pageRef = "/references"
+    weight = 50
   [[menus.main]]
     name = "시스템"
     pageRef = "/system"
-    weight = 50
+    weight = 60

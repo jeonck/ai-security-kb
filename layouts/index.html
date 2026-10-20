@@ -32,12 +32,21 @@
   {{ end }}
 </section>
 
+{{- $items := where site.RegularPages "Section" "items" }}
 <section class="block">
-  <h2 class="block-title">카테고리</h2>
+  <h2 class="block-title">책의 뼈대 · 항목 {{ len $items }}건</h2>
+  <a class="card card-feature" href="{{ "book/matrix/" | relURL }}">
+    <span class="card-date">집필 매트릭스</span>
+    <span class="card-title">생명주기 × 통제 계층 — 어느 절이 쓸 준비가 됐나</span>
+    <span class="card-summary">칸마다 근거 항목 수와 빈 칸. 목차 초안·참고문헌으로 이어진다.</span>
+  </a>
+  <p class="axis-label">생명주기 — 어디서 뚫리나</p>
   <div class="chips">
-    {{ range site.Taxonomies.categories.ByCount }}
-    <a class="chip" href="{{ .Page.RelPermalink }}">{{ .Page.Title }} <b>{{ .Count }}</b></a>
-    {{ end }}
+    {{ range sort site.Data.axes.lifecycle "order" }}{{ $k := .key }}{{ with site.GetPage (printf "/lifecycle/%s" $k) }}<a class="chip chip-lc" href="{{ .RelPermalink }}">{{ .Title }} <b>{{ len (where $items "Params.lifecycle" "intersect" (slice $k)) }}</b></a>{{ end }}{{ end }}
+  </div>
+  <p class="axis-label">통제 계층 — 무엇으로 막나</p>
+  <div class="chips">
+    {{ range sort site.Data.axes.controls "order" }}{{ $k := .key }}{{ with site.GetPage (printf "/controls/%s" $k) }}<a class="chip chip-ctl" href="{{ .RelPermalink }}">{{ .Title }} <b>{{ len (where $items "Params.controls" "intersect" (slice $k)) }}</b></a>{{ end }}{{ end }}
   </div>
 </section>
 {{ end }}

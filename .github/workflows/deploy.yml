@@ -25,8 +25,14 @@ jobs:
         with:
           hugo-version: "0.168.0"
           extended: true
+      - name: Install PyYAML
+        run: python3 -c "import yaml" || pip install --break-system-packages pyyaml || pip install pyyaml
       - name: Check content
         run: ./scripts/check.sh
+      - name: Export references (BibTeX, CSL-JSON)
+        run: |
+          python3 scripts/kb.py bib > static/references.bib
+          python3 scripts/kb.py csl > static/references.json
       - id: pages
         uses: actions/configure-pages@v5
       - name: Build

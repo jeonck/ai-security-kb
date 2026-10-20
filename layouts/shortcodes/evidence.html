@@ -1,0 +1,23 @@
+{{- /* 목차 초안에서 장별 근거 항목을 자동으로 모은다.
+  {{< evidence lifecycle="agent-runtime" >}}  {{< evidence controls="identity" >}}
+  {{< evidence lifecycle="agent-runtime" controls="identity" >}}  {{< evidence ids="AISEC-2026-0005 AISEC-2026-0004" >}}
+  min="3": 근거가 이보다 적으면 '근거 부족'으로 표시 */ -}}
+{{- $items := where site.RegularPages "Section" "items" -}}
+{{- with .Get "ids" }}
+  {{- $want := split . " " }}
+  {{- $items = where $items "Params.id" "in" $want }}
+{{- end }}
+{{- with .Get "lifecycle" }}{{ $items = where $items "Params.lifecycle" "intersect" (slice .) }}{{ end }}
+{{- with .Get "controls" }}{{ $items = where $items "Params.controls" "intersect" (slice .) }}{{ end }}
+{{- $min := int (.Get "min" | default "3") -}}
+{{- $n := len $items -}}
+<div class="evidence{{ if lt $n $min }} evidence-thin{{ end }}">
+  <p class="evidence-head">근거 항목 {{ $n }}건{{ if lt $n $min }} · <b>근거 부족</b> (기초 문헌 수집 대상){{ end }}</p>
+  {{- if $items }}
+  <ul>
+    {{- range $items.ByDate.Reverse }}
+    <li><a href="{{ .RelPermalink }}">{{ .Params.id }}</a> {{ .Title }} <span class="muted">· {{ .Params.item_type }}{{ if ne .Params.status "confirmed" }} · {{ partial "status-badge.html" . }}{{ end }}</span></li>
+    {{- end }}
+  </ul>
+  {{- end }}
+</div>
