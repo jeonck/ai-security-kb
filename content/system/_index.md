@@ -20,6 +20,7 @@ description: "AI 보안 리서치 조교의 구조, 실행 흐름, 실제로 쓰
 | AI 보안 주간 심층 리포트 | 매주 월 07:44 CT, 딥 리서치 스킬로 한 주 종합 + 심층 후보 분석 + 책 관점 | [프롬프트 전문](weekly-report/) · [딥 리서치가 쓰이는 곳](deep-research/) |
 | 항목 (`content/items/`) | 지식 베이스의 기본 단위. 출처 서지·주장별 원문 위치·두 축 태그 | [형식](https://github.com/jeonck/ai-security-kb/blob/main/docs/item-format.md) |
 | `data/axes.yaml` | 책의 뼈대인 두 축(생명주기·통제 계층)의 정의 | [집필 매트릭스](../book/matrix/) |
+| 책 목차 (`content/book/outline.md`) | 두 축 격자를 그대로 장 구조로 쓴 목차(v1.1, 4부 16장). 장마다 근거 항목이 자동으로 모이고, 끝의 "기초 문헌 수집 우선순위" 표를 기초 문헌 작업이 따른다 | [목차](../book/outline/) · [설계 근거(딥 리서치 리포트)](../book/outline-research/) |
 | `CLAUDE.md` | 세 작업이 매번 먼저 읽는 규칙의 원본 | [레포](https://github.com/jeonck/ai-security-kb/blob/main/CLAUDE.md) |
 | `scripts/kb.py` | 검증(스키마·축 어휘·1차 출처 조건·URL 중복), 중복 찾기, 매트릭스 집계, 프로젝트 사본·참고문헌 내보내기 | [레포](https://github.com/jeonck/ai-security-kb/blob/main/scripts/kb.py) |
 | GitHub Actions | 푸시마다 다시 검사 → 참고문헌(BibTeX·CSL-JSON) 생성 → 빌드 → Pages 배포 | [워크플로](https://github.com/jeonck/ai-security-kb/blob/main/.github/workflows/deploy.yml) |
@@ -31,5 +32,6 @@ description: "AI 보안 리서치 조교의 구조, 실행 흐름, 실제로 쓰
 - **사실은 읽은 페이지에서만, 가능하면 1차 원문에서.** 기사가 원 보고서·권고·논문에 링크하면 그것까지 연다. 1차 원문에서 주요 주장을 확인한 항목만 "1차 확인"(confirmed)이 된다.
 - **인용 단위는 주장(claim).** 각 주장은 어느 출처의 어디(절·표·문단)에서 왔는지 남긴다. 원문 문장은 저장하지 않는다 — 책에 직접 인용할 때는 저자가 그 위치로 원문을 연다.
 - **막힌 페이지는 우회하지 않는다.** 요청 제한(429)이나 차단이 나면 재시도·미러·아카이브·브라우저 위장으로 밀어붙이지 않고, 다른 공개 출처로 교차 확인한다.
+- **뼈대는 저자가, 근거는 조사가.** 책의 뼈대(두 축 격자)는 저자가 정한다. 딥 리서치는 격자를 바꾸지 않고 칸마다 비었는지, 실사고로 쓸 수 있는지, 지금 가르칠 수 있는 기술인지를 시험하고 채운다. 다른 책은 정답이 아니라 빈자리를 찾는 비교 대상이다.
 - **빈손이 나쁜 기록보다 낫다.** 새 자료가 없으면 아무것도 커밋하지 않는다.
 - **날짜는 명령으로.** 실행 환경 시계가 UTC라 저녁에는 하루 앞서 있다. 날짜는 항상 `TZ=America/Chicago date` 출력으로 정한다.
