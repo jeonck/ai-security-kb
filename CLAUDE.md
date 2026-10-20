@@ -19,7 +19,7 @@
 | `content/weekly/YYYY-Www.md` | 주간 심층 리포트 | 주간 작업 |
 | `data/state.yaml` | 마지막 수집 시각(`last_run`)과 실행 기록(`runs`) | 수집·기초 문헌 작업 |
 | `data/axes.yaml` | 두 축·유형·분류·출처 등급의 정의 | **저자만** |
-| `content/book/` | 책 개요·목차(`outline.md`)·목차 설계 근거(`outline-research.md`)·집필 매트릭스 | **저자만** (근거 목록은 자동). 목차를 크게 고칠 때는 채팅에서 딥 리서치로 근거를 모은다 |
+| `content/book/` | 책 개요·목차(`outline.md`)·목차 설계 근거(`outline-research.md`)·집필 매트릭스 | **저자만** (근거 목록은 자동). 뼈대(두 축 격자)는 저자가 정하고, 목차를 크게 고칠 때는 채팅에서 딥 리서치로 칸을 시험·보강한다 |
 | `content/system/` | 시스템 설명·프롬프트·구축 기록 | **저자만** |
 | `content/catalog.md`, `content/references.md`, `content/lifecycle/`, `content/controls/` | 자동 생성 페이지의 틀 | **저자만** |
 | `layouts/`, `static/`, `hugo.toml`, `.github/`, `scripts/`, `docs/` | 사이트 틀·도구·형식 문서 | **저자만** |
@@ -93,7 +93,7 @@ deep_dives: ["AISEC-2026-0014"]   # 이번 리포트에서 심층 분석한 항�
 ## 핵심 흐름 1: ...             (동작 원리, 이번 주 근거 항목 ID, 추가 근거·반론·후속)
 ...
 ## 이번 주 점검 항목             (Kubernetes / CI·CD / 에이전트 플랫폼 팀 기준, 구체 행동)
-## 책 관점                       (어느 장의 근거가 늘었나, 매트릭스에서 새로 채워진 칸·여전히 빈 칸, 목차 구조 변경 제안 — 제안만, outline.md는 고치지 않는다)
+## 책 관점                       (어느 장의 근거가 늘었나, 매트릭스에서 새로 채워진 칸·여전히 빈 칸, 목차 구조 변경 제안 — 제안만, outline.md는 고치지 않는다. 두 축 격자(2부 = 생명주기 5단계 흐름 순서, 3부 = 통제 6칸과 장 1:1)는 유지하는 범위에서 절·논지·사례를 제안한다)
 ## 다음 주 지켜볼 것
 ## Sources
 ```
