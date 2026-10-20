@@ -3,7 +3,7 @@ title: "이 지식 베이스는 어떻게 돌아가나"
 description: "AI 보안 리서치 조교의 구조, 실행 흐름, 실제로 쓰는 프롬프트, 구축 과정과 테스트 기록"
 ---
 
-이 사이트의 콘텐츠는 사람이 쓰지 않는다. claude.ai의 **스케줄 작업** 세 개가 정해진 시각에 새 세션으로 깨어나, 웹을 조사하고, 이 레포에 커밋한다. 사람(CK)은 규칙 문서(`CLAUDE.md`)와 프롬프트를 고치는 역할만 한다.
+이 사이트의 콘텐츠는 사람이 쓰지 않는다. 세 작업이 정해진 시각에 깨어나 웹을 조사하고 이 레포에 커밋한다. 2026-10-20부터는 **GitHub Actions 크론**에서 Claude Code로 돈다([GitHub Actions로 돌리기](automation/)). 처음에는 claude.ai 스케줄 작업으로 돌았고, 레포 연결이 자주 실패해 옮겼다. claude.ai 쪽 작업은 꺼 두었다. 사람(CK)은 규칙 문서(`CLAUDE.md`)와 프롬프트를 고치는 역할만 한다.
 
 ## 한 번의 수집 실행은 이렇게 흐른다
 
@@ -24,7 +24,7 @@ description: "AI 보안 리서치 조교의 구조, 실행 흐름, 실제로 쓰
 | `CLAUDE.md` | 세 작업이 매번 먼저 읽는 규칙의 원본 | [레포](https://github.com/jeonck/ai-security-kb/blob/main/CLAUDE.md) |
 | `scripts/kb.py` | 검증(스키마·축 어휘·1차 출처 조건·URL 중복), 중복 찾기, 매트릭스 집계, 프로젝트 사본·참고문헌 내보내기 | [레포](https://github.com/jeonck/ai-security-kb/blob/main/scripts/kb.py) |
 | GitHub Actions | 푸시마다 다시 검사 → 참고문헌(BibTeX·CSL-JSON) 생성 → 빌드 → Pages 배포 | [워크플로](https://github.com/jeonck/ai-security-kb/blob/main/.github/workflows/deploy.yml) |
-| GitHub Actions 크론 (준비됨, 꺼짐) | 세 작업을 Claude Code 헤드리스 모드로 돌리는 대체 실행 환경. 에이전트는 파일만 고치고 워크플로가 검증·커밋한다 | [GitHub Actions로 돌리기](automation/) |
+| GitHub Actions 크론 (운영 중) | 세 작업을 Claude Code 헤드리스 모드로 돌리는 대체 실행 환경. 에이전트는 파일만 고치고 워크플로가 검증·커밋한다 | [GitHub Actions로 돌리기](automation/) |
 | claude.ai 프로젝트 "리서치" | 일자별 묶음(다이제스트+항목 전문)과 전체 목록의 사본. Claude 채팅에서 바로 검색·질문용 | — |
 
 ## 설계에서 지킨 원칙
