@@ -6,6 +6,7 @@
     <span>{{ $p.Date.Format "2006-01-02" }}</span>
     <span>{{ $p.Params.item_type }}</span>
     {{ partial "status-badge.html" $p }}
+    {{ if $p.Params.deep_dive }}<span class="badge badge-deep" title="{{ $p.Params.deep_dive_reason }}">심층 후보</span>{{ end }}
   </p>
   <h3 class="item-title"><a href="{{ $p.RelPermalink }}">{{ $p.Title }}</a></h3>
   <p class="item-summary">{{ $p.Params.summary }}</p>

@@ -17,6 +17,14 @@
   {{ with .Params.book_note }}
   <aside class="callout"><b>집필 메모</b> {{ . }}</aside>
   {{ end }}
+  {{ if .Params.deep_dive }}
+  {{- $covered := slice }}
+  {{- range where site.RegularPages "Section" "weekly" }}{{ if in (.Params.deep_dives | default slice) $p.Params.id }}{{ $covered = $covered | append . }}{{ end }}{{ end }}
+  <aside class="callout callout-deep"><b>심층 후보</b> {{ .Params.deep_dive_reason }}
+    {{- if $covered }} — 심층 분석: {{ range $i, $w := $covered }}{{ if $i }}, {{ end }}<a href="{{ $w.RelPermalink }}">{{ $w.Title }}</a>{{ end }}
+    {{- else }} — 다음 주간 리포트에서 딥 리서치로 다룬다.{{ end }}
+  </aside>
+  {{ end }}
 
   <div class="prose">{{ .Content }}</div>
 

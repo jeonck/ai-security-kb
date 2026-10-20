@@ -194,3 +194,5 @@ nav a:hover { color: var(--accent); }
 .mx-ids a:hover { color: var(--accent); text-decoration: underline; }
 .mx-empty { color: var(--muted); }
 .mx-total { font-family: var(--mono); color: var(--muted); text-align: center; }
+.badge-deep { color: var(--accent); background: var(--accent-soft); border-color: var(--accent); }
+.callout-deep { border-left-color: var(--accent); background: var(--surface); border: 1px solid var(--accent); border-left-width: 4px; }

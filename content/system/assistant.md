@@ -23,7 +23,7 @@ updated: "2026-10-20"
 - **리서처에게 이미 수집한 항목 목록을 넘긴다.** 이미 실린 기사를 다시 찾느라 쓰는 시간을 줄이기 위해서다.
 - **리서처가 완성된 항목 파일을 써 온다(v4).** 1차 원문까지 열어 출처 메타데이터와 주장별 위치를 채우는 일은 원문을 읽은 리서처가 가장 정확하게 할 수 있다. 코디네이터는 중복 판정·축 태그 점검·ID 부여·다이제스트·검증·커밋을 맡는다.
 
-## 현재 프롬프트 (v4)
+## 현재 프롬프트 (v4.1)
 
 각 실행이 받는 메시지 전문이다. 공개 사이트라 git 설정의 이메일 주소만 `<repo-owner-email>`로 가렸다.
 
@@ -55,17 +55,18 @@ Agent 도구(subagent_type="general-purpose", run_in_background=false)로 아래
 - 후보 파일을 모두 읽는다. 각 후보의 1차 URL·제목 키워드·CVE/GHSA/arXiv ID로 `python3 scripts/kb.py find <...>` 를 돌려 기존 항목과 겹치면 제외한다(중요한 후속은 "후속: …" 새 항목 + related, 원 항목 followup 정리). 리서처끼리 겹치면 하나로 합치고 출처 병합.
 - 기간 밖, 1차 출처도 2등급 출처도 없는 후보, claims의 locator가 비어 있는 후보는 버린다. 영향도 순 최대 12개.
 - 두 축 태그를 다시 본다: 생명주기는 사건의 중심 단계, 통제는 "이 사례가 어떤 통제의 실패/필요성을 보여주나". 거버넌스만 달린 항목에는 구체 통제를 추가한다. book_note는 outline.md의 장 번호·제목에 맞춘다.
+- **심층 후보 판정**: 남은 후보 중 CLAUDE.md·docs/item-format.md의 기준(실제 악용 확인 / 영향 범위가 큼 / 새 공격 유형 / 책의 장을 바꿀 만함)에 맞는 것에만 `deep_dive: true`와 `deep_dive_reason`(기준 + 이유 한 줄)을 단다. 보통 0~2건. 기존 항목의 후속(예: KEV 등재로 실제 악용 확인)이 기준을 새로 충족하면 원 항목에 표시를 단다.
 
 ## 3. 기록·검증·커밋 (새 항목이 1개 이상일 때만 — 0개면 아무 파일도 바꾸지 않고 커밋하지 않는다)
 - `python3 scripts/kb.py next-id` 로 시작 번호를 받아 순서대로 ID를 매기고 `content/items/<ID>.md` 로 저장한다(파일명=id).
 - 기존 항목 중 이번에 원문을 확인한 것(status unverified/partial)은 그 파일을 보완하고 status를 올린다.
-- 다이제스트: CLAUDE.md 형식대로 `content/digest/<오늘>.md` 생성 또는 `## 수집 (HH:MM CT)` 절을 붙인다(큰 그림 2~3줄 + `{{</* items ... */>}}`). `data/state.yaml` 의 last_run·runs 갱신.
+- 다이제스트: CLAUDE.md 형식대로 `content/digest/<오늘>.md` 생성 또는 `## 수집 (HH:MM CT)` 절을 붙인다(큰 그림 2~3줄 + `{{< items ... >}}`). `data/state.yaml` 의 last_run·runs 갱신.
 - `./scripts/check.sh` (hugo가 없으면 먼저 `pip install hugo --break-system-packages -q`). 마지막 줄이 OK여야 커밋한다. 실패하면 콘텐츠를 고쳐 재실행(스크립트·레이아웃·설정·axes.yaml·book/·system/ 수정 금지).
 - 바꾼 파일만 add → 커밋 `digest: <YYYY-MM-DD HH:MM> CT — N건 추가` → `main` 푸시(거절되면 `git pull --rebase` 후 재검증·재푸시).
 - 프로젝트 사본: CLAUDE.md의 "claude.ai 프로젝트 사본" 절차대로 export-day·export-index 결과를 `project_write`(local_path). 실패해도 레포 커밋은 유지하고 보고에 적는다.
 
 ## 4. 보고 (최종 메시지, 한국어)
-- 새 항목이 있으면: 첫 줄 "🛡️ AI 보안 새 자료 N건 추가 (<날짜 시각> CT)". 항목별 한 줄(ID · 제목 · 생명주기×통제 · 1차 확인 여부). 그 다음 사이트 링크 https://jeonck.github.io/ai-security-kb/digest/<오늘>/ 와 커밋 해시, 이번에 새로 채워진 매트릭스 칸(있으면), 마지막에 Sources(1차 원문 위주).
+- 새 항목이 있으면: 첫 줄 "🛡️ AI 보안 새 자료 N건 추가 (<날짜 시각> CT)". 항목별 한 줄(ID · 제목 · 생명주기×통제 · 1차 확인 여부, 심층 후보면 🔎 표시와 이유). 그 다음 사이트 링크 https://jeonck.github.io/ai-security-kb/digest/<오늘>/ 와 커밋 해시, 이번에 새로 채워진 매트릭스 칸(있으면), 마지막에 Sources(1차 원문 위주).
 - 새 항목이 없으면: "새 AI 보안 자료 없음 (<날짜 시각> CT)" 한 줄만.
 - 접근 실패·원문 확인 실패가 있었으면 한 줄로 덧붙인다.
 ```
@@ -86,3 +87,5 @@ Agent 도구(subagent_type="general-purpose", run_in_background=false)로 아래
 **v2 → v3**: 규칙의 원본이 프로젝트 `ai-security/README.md`에서 레포 `CLAUDE.md`로, 이력의 원본이 `ai-security/index.md`에서 `content/catalog.md`로 옮겨졌다. 기록 단계에 `check.sh` 통과·커밋·푸시·프로젝트 사본 갱신이 추가됐고, 레포 접근 실패 시 대체 모드가 생겼다.
 
 **v3 → v4**: 기록 단위가 "다이제스트 안의 문단"에서 "항목 파일 하나"로 바뀌었다. 리서처의 출력이 노트에서 완성된 항목 파일로, 중복 판정이 catalog 표의 URL 대조에서 `kb.py find`로, 이력 기록이 catalog 머리말에서 `data/state.yaml`로 옮겨졌다. 레포 접근 실패 시 프로젝트 대체 모드는 없앴다(항목 체계가 레포에만 있기 때문).
+
+**v4 → v4.1** (11:20경): 코디네이터가 기준(실제 악용 확인 / 영향 범위가 큼 / 새 공격 유형 / 책의 장을 바꿀 만함)에 맞는 항목에 **심층 후보** 표시(`deep_dive`)를 단다. 표시된 항목은 다음 주간 리포트가 딥 리서치로 파고든다.

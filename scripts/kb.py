@@ -5,6 +5,7 @@
   python3 scripts/kb.py next-id               다음 항목 ID
   python3 scripts/kb.py find <url-or-text>    출처 URL·제목·식별자로 기존 항목 찾기 (중복 판정)
   python3 scripts/kb.py coverage              생명주기 × 통제 매트릭스 건수와 빈칸
+  python3 scripts/kb.py deep-dives            아직 주간 리포트에서 다루지 않은 심층 후보 (deep_dive: true)
   python3 scripts/kb.py export-day <date>     그날 다이제스트 + 항목 전문을 하나의 마크다운으로 (프로젝트 사본용)
   python3 scripts/kb.py export-index          전체 목록 마크다운 (프로젝트 ai-security/index.md용)
   python3 scripts/kb.py bib                   참고문헌 BibTeX
@@ -49,10 +50,17 @@ def split_front_matter(text):
     return yaml.safe_load(text[4:end]) or {}, text[end + 5:]
 
 
+YAML_ERRORS = []
+
+
 def load_items():
     items = []
     for p in sorted(ITEMS.glob("AISEC-*.md")):
-        fm, body = split_front_matter(p.read_text(encoding="utf-8"))
+        try:
+            fm, body = split_front_matter(p.read_text(encoding="utf-8"))
+        except Exception as ex:  # 깨진 YAML은 검증 실패로 보고하고 건너뛴다
+            YAML_ERRORS.append(f"{p.name}: front matter를 읽지 못함 — {str(ex).splitlines()[0]} (문자열 안의 큰따옴표·콜론을 확인)")
+            continue
         fm["_path"] = p
         fm["_body"] = body
         items.append(fm)
@@ -103,6 +111,7 @@ def label(axis, key):
 def validate():
     errs, warns = [], []
     items = load_items()
+    errs += YAML_ERRORS
     ids = {}
     url_owner = {}
     today = now_ct().date() + dt.timedelta(days=1)
@@ -199,6 +208,11 @@ def validate():
                 e(f"claims[{i}].source가 sources key가 아님 ({c.get('source')})")
             if not c.get("locator"):
                 e(f"claims[{i}].locator 없음")
+        dd = it.get("deep_dive", False)
+        if dd not in (True, False):
+            e("deep_dive는 true/false")
+        if dd is True and not str(it.get("deep_dive_reason") or "").strip():
+            e("deep_dive: true 인데 deep_dive_reason이 없음")
         body = it["_body"]
         for sec in REQUIRED_SECTIONS:
             if sec not in body:
@@ -235,6 +249,9 @@ def validate():
         for f in ("title", "date", "slug", "description"):
             if not fm.get(f):
                 errs.append(f"weekly/{p.name}: front matter {f} 없음")
+        for i in fm.get("deep_dives") or []:
+            if i not in ids:
+                errs.append(f"weekly/{p.name}: deep_dives에 없는 항목 ID ({i})")
 
     if STATE.exists():
         st = yaml.safe_load(STATE.read_text(encoding="utf-8")) or {}
@@ -315,6 +332,31 @@ def coverage():
     return 0
 
 
+def covered_deep_dives():
+    done = {}
+    for p in sorted(WEEKLY.glob("*.md")):
+        if p.name == "_index.md":
+            continue
+        fm, _ = split_front_matter(p.read_text(encoding="utf-8"))
+        for i in fm.get("deep_dives") or []:
+            done.setdefault(i, []).append(p.stem)
+    return done
+
+
+def deep_dives():
+    done = covered_deep_dives()
+    pending = [it for it in load_items() if it.get("deep_dive") is True and it["id"] not in done]
+    pending.sort(key=lambda x: str(x.get("collected")), reverse=True)
+    for it in pending:
+        print(f"{it['id']} | {it['title']} | {it.get('deep_dive_reason', '')}")
+    if not pending:
+        print("NONE")
+    covered = [f"{i} → {', '.join(w)}" for i, w in done.items()]
+    if covered:
+        print("\n이미 다룬 심층 후보: " + "; ".join(covered))
+    return 0
+
+
 def item_markdown(it, heading="###"):
     srcs = {s["key"]: s for s in it.get("sources") or []}
     lines = [f"{heading} {it['id']} — {it['title']}", ""]
@@ -322,6 +364,8 @@ def item_markdown(it, heading="###"):
     lines.append(f"- 생명주기: {', '.join(label('lifecycle', k) for k in it['lifecycle'])} · 통제: {', '.join(label('controls', k) for k in it['controls'])}")
     lines.append(f"- 요약: {it['summary']}")
     lines.append(f"- 집필 메모: {it.get('book_note', '')}")
+    if it.get("deep_dive") is True:
+        lines.append(f"- 심층 후보: {it.get('deep_dive_reason', '')}")
     body = re.sub(r"^## ", "#### ", it["_body"].strip(), flags=re.M)
     lines += ["", body, "", "주장과 출처:"]
     for c in it.get("claims") or []:
@@ -432,6 +476,8 @@ def main(argv):
         return find(" ".join(args))
     if cmd == "coverage":
         return coverage()
+    if cmd == "deep-dives":
+        return deep_dives()
     if cmd == "export-day" and args:
         return export_day(args[0])
     if cmd == "export-index":

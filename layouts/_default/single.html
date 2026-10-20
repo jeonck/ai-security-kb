@@ -11,6 +11,12 @@
   {{ if and (gt .WordCount 400) .TableOfContents }}
   <details class="toc"><summary>목차</summary>{{ .TableOfContents }}</details>
   {{ end }}
+  {{ with .Params.deep_dives }}
+  <section class="block">
+    <h2 class="block-title">이번 주 심층 분석 항목</h2>
+    <div class="item-list">{{ range . }}{{ with site.GetPage (printf "/items/%s" .) }}{{ partial "item-card.html" . }}{{ end }}{{ end }}</div>
+  </section>
+  {{ end }}
   <div class="prose">{{ .Content }}</div>
   {{ with .GitInfo }}<p class="muted">마지막 커밋 <a href="{{ site.Params.repo }}/commit/{{ .Hash }}">{{ .AbbreviatedHash }}</a></p>{{ end }}
 </article>

@@ -22,7 +22,7 @@
         <td>{{ range $i, $t := .GetTerms "controls" }}{{ if $i }}, {{ end }}{{ $t.LinkTitle }}{{ end }}</td>
         <td><a href="{{ .RelPermalink }}">{{ .Title }}</a></td>
         <td><a href="{{ $prim.url }}">{{ $prim.outlet }}</a></td>
-        <td>{{ partial "status-badge.html" . }}</td>
+        <td>{{ partial "status-badge.html" . }}{{ if .Params.deep_dive }} <span class="badge badge-deep" title="{{ .Params.deep_dive_reason }}">심층</span>{{ end }}</td>
       </tr>
     {{- end }}
     </tbody>
