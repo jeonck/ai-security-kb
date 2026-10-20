@@ -46,7 +46,7 @@
       <li id="src-{{ .key }}">
         <span class="badge {{ if eq .tier 1 }}badge-ok{{ else if eq .tier 2 }}badge-mid{{ else }}badge-no{{ end }}">{{ .tier }}등급 · {{ if eq .role "primary" }}1차 원문{{ else }}보도·해설{{ end }}</span>
         {{ with .authors }}{{ delimit . ", " }}. {{ end }}<a href="{{ .url }}">{{ .title }}</a>. {{ .outlet }}{{ with .published }}, {{ . | time.Format "2006-01-02" }}{{ end }}.
-        <span class="muted">열람 {{ .accessed | time.Format "2006-01-02" }} · 키 <code>{{ replace (lower $p.Params.id) "-" "" }}{{ .key }}</code></span>
+        <span class="muted">{{ with .accessed }}열람 {{ . | time.Format "2006-01-02" }}{{ else }}원문 미열람{{ end }} · 키 <code>{{ replace (lower $p.Params.id) "-" "" }}{{ .key }}</code></span>
       </li>
     {{- end }}
     </ol>

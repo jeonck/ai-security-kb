@@ -105,7 +105,7 @@ Kubernetes·CI/CD·에이전트 플랫폼을 운영하는 팀이 무엇을 점�
 | `authors` | 저자 이름 리스트 (모르면 빈 리스트) |
 | `published` | 원문 발행일 |
 | `url` | 원문 URL |
-| `accessed` | 실제로 열어 읽은 날짜. **열지 못했으면 이 필드를 비우지 말고 그 출처를 빼거나 status를 낮춘다** |
+| `accessed` | 실제로 열어 읽은 날짜. 열지 못한 출처는 빼는 것이 원칙이고, 원문을 하나도 열지 못한 항목(`status: unverified`)만 예외로 accessed를 비운 채 출처를 남길 수 있다 |
 
 - **1차 출처 추적**: 2차 기사가 원 보고서·권고·논문·공식 발표에 링크하면 그 원문을 열어 `primary`로 넣는다. 기사는 `coverage`로 남긴다.
 - `status: confirmed` 이려면 `role: primary`, `tier: 1` 출처가 최소 1개 있어야 한다 (validate가 검사). 1차 원문을 찾을 수 없는 사건이면 `partial`.

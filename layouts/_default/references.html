@@ -19,7 +19,7 @@
       {{- $s := .s }}{{ $it := .it }}
       <li>
         {{ with $s.authors }}{{ delimit . ", " }}. {{ end }}<a href="{{ $s.url }}">{{ $s.title }}</a>. {{ $s.outlet }}{{ with $s.published }}, {{ . | time.Format "2006-01-02" }}{{ end }}.
-        <span class="muted">{{ if eq $s.role "primary" }}1차 원문{{ else }}보도·해설{{ end }} · 열람 {{ $s.accessed | time.Format "2006-01-02" }} · <a href="{{ $it.RelPermalink }}">{{ $it.Params.id }}</a> · <code>{{ replace (lower $it.Params.id) "-" "" }}{{ $s.key }}</code></span>
+        <span class="muted">{{ if eq $s.role "primary" }}1차 원문{{ else }}보도·해설{{ end }} · {{ with $s.accessed }}열람 {{ . | time.Format "2006-01-02" }}{{ else }}원문 미열람{{ end }} · <a href="{{ $it.RelPermalink }}">{{ $it.Params.id }}</a> · <code>{{ replace (lower $it.Params.id) "-" "" }}{{ $s.key }}</code></span>
       </li>
     {{- end }}
     </ol>

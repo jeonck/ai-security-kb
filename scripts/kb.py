@@ -171,8 +171,8 @@ def validate():
             for f in ("title", "outlet", "url"):
                 if not s.get(f):
                     e(f"sources[{sk}].{f} 없음")
-            if not s.get("accessed"):
-                e(f"sources[{sk}].accessed 없음 (열어 읽은 출처만 남긴다)")
+            if not s.get("accessed") and it.get("status") != "unverified":
+                e(f"sources[{sk}].accessed 없음 (열어 읽은 출처만 남긴다. 원문을 못 열었으면 status: unverified)")
             if s.get("published"):
                 try:
                     if as_date(s["published"]) > today:
@@ -331,7 +331,7 @@ def item_markdown(it, heading="###"):
     lines += ["", "출처:"]
     for s in it.get("sources") or []:
         au = ", ".join(s.get("authors") or [])
-        lines.append(f"- [{s['key']}] ({'1차' if s['role'] == 'primary' else '보도'}, {s['tier']}등급) {au + '. ' if au else ''}\"{s['title']}\". {s['outlet']}, {s.get('published', '')}. {s['url']} (열람 {s.get('accessed', '')})")
+        lines.append(f"- [{s['key']}] ({'1차' if s['role'] == 'primary' else '보도'}, {s['tier']}등급) {au + '. ' if au else ''}\"{s['title']}\". {s['outlet']}, {s.get('published', '')}. {s['url']} ({'열람 ' + str(s['accessed']) if s.get('accessed') else '원문 미열람'})")
     if it.get("followup"):
         lines.append(f"\n후속 추적: {it['followup']}")
     return "\n".join(lines)
