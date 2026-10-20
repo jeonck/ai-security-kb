@@ -1,0 +1,153 @@
+{{ define "main" }}
+<article>
+  <header class="page-head">
+    <h1>{{ .Title }}</h1>
+    {{ with .Description }}<p class="lede">{{ . }}</p>{{ end }}
+  </header>
+  <div class="prose catalog" data-catalog>{{ .Content }}</div>
+</article>
+<script>
+// 전체 목록 표에 검색·카테고리 필터·페이징을 붙인다.
+// 원본 catalog.md는 그대로 마크다운 표이고, 스크립트가 꺼져 있으면 전체 표가 그대로 보인다.
+(function () {
+  var root = document.querySelector('[data-catalog]');
+  if (!root) return;
+  var table = root.querySelector('table');
+  if (!table || !table.tBodies.length) return;
+  var tbody = table.tBodies[0];
+  var rows = Array.prototype.slice.call(tbody.rows);
+  if (!rows.length) return;
+
+  var PAGE_SIZE = 50;
+  var params = new URLSearchParams(location.search);
+  var state = {
+    q: params.get('q') || '',
+    cat: params.get('cat') || '',
+    page: Math.max(1, parseInt(params.get('page') || '1', 10) || 1)
+  };
+
+  var data = rows.map(function (tr) {
+    var c = tr.cells;
+    return {
+      tr: tr,
+      cat: c[1] ? c[1].textContent.trim() : '',
+      text: tr.textContent.toLowerCase()
+    };
+  });
+
+  // 카테고리 목록 (건수 많은 순)
+  var counts = {};
+  data.forEach(function (d) { if (d.cat) counts[d.cat] = (counts[d.cat] || 0) + 1; });
+  var cats = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a] || a.localeCompare(b, 'ko'); });
+
+  // 컨트롤
+  var bar = document.createElement('div');
+  bar.className = 'cat-bar';
+  bar.innerHTML =
+    '<label class="cat-field"><span>검색</span><input type="search" placeholder="제목·카테고리·날짜" autocomplete="off"></label>' +
+    '<label class="cat-field"><span>카테고리</span><select><option value="">전체 (' + data.length + ')</option></select></label>' +
+    '<p class="cat-count" aria-live="polite"></p>';
+  var input = bar.querySelector('input');
+  var select = bar.querySelector('select');
+  var countEl = bar.querySelector('.cat-count');
+  cats.forEach(function (c) {
+    var o = document.createElement('option');
+    o.value = c; o.textContent = c + ' (' + counts[c] + ')';
+    select.appendChild(o);
+  });
+  input.value = state.q;
+  select.value = cats.indexOf(state.cat) >= 0 ? state.cat : '';
+  state.cat = select.value;
+
+  var wrap = document.createElement('div');
+  wrap.className = 'cat-table';
+  table.parentNode.insertBefore(bar, table);
+  table.parentNode.insertBefore(wrap, table);
+  wrap.appendChild(table);
+
+  var pager = document.createElement('nav');
+  pager.className = 'pager';
+  pager.setAttribute('aria-label', '목록 페이지');
+  wrap.parentNode.insertBefore(pager, wrap.nextSibling);
+
+  var empty = document.createElement('p');
+  empty.className = 'muted cat-empty';
+  empty.textContent = '조건에 맞는 항목이 없습니다.';
+  empty.hidden = true;
+  wrap.parentNode.insertBefore(empty, pager);
+
+  function filtered() {
+    var q = state.q.trim().toLowerCase();
+    return data.filter(function (d) {
+      return (!state.cat || d.cat === state.cat) && (!q || d.text.indexOf(q) >= 0);
+    });
+  }
+
+  function syncUrl() {
+    var p = new URLSearchParams();
+    if (state.q) p.set('q', state.q);
+    if (state.cat) p.set('cat', state.cat);
+    if (state.page > 1) p.set('page', String(state.page));
+    var qs = p.toString();
+    try { history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash); } catch (e) {}
+  }
+
+  function btn(label, page, opts) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = label;
+    if (opts && opts.current) { b.setAttribute('aria-current', 'page'); b.className = 'is-current'; }
+    if (opts && opts.disabled) b.disabled = true;
+    if (opts && opts.aria) b.setAttribute('aria-label', opts.aria);
+    b.addEventListener('click', function () {
+      state.page = page; render();
+      wrap.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    });
+    return b;
+  }
+
+  function render() {
+    var list = filtered();
+    var pages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+    if (state.page > pages) state.page = pages;
+    var start = (state.page - 1) * PAGE_SIZE;
+    var shown = list.slice(start, start + PAGE_SIZE);
+    var visible = new Set(shown.map(function (d) { return d.tr; }));
+    data.forEach(function (d) { d.tr.hidden = !visible.has(d.tr); });
+
+    empty.hidden = list.length > 0;
+    countEl.textContent = list.length
+      ? list.length + '건 중 ' + (start + 1) + '–' + (start + shown.length) + (list.length !== data.length ? ' (전체 ' + data.length + '건)' : '')
+      : '0건 (전체 ' + data.length + '건)';
+
+    pager.innerHTML = '';
+    pager.hidden = pages <= 1;
+    if (pages > 1) {
+      pager.appendChild(btn('‹ 이전', state.page - 1, { disabled: state.page === 1, aria: '이전 페이지' }));
+      var last = 0;
+      for (var i = 1; i <= pages; i++) {
+        if (i === 1 || i === pages || Math.abs(i - state.page) <= 1) {
+          if (last && i - last > 1) {
+            var gap = document.createElement('span'); gap.className = 'pager-gap'; gap.textContent = '…';
+            pager.appendChild(gap);
+          }
+          pager.appendChild(btn(String(i), i, { current: i === state.page, aria: i + '페이지' }));
+          last = i;
+        }
+      }
+      pager.appendChild(btn('다음 ›', state.page + 1, { disabled: state.page === pages, aria: '다음 페이지' }));
+    }
+    syncUrl();
+  }
+
+  var t;
+  input.addEventListener('input', function () {
+    clearTimeout(t);
+    t = setTimeout(function () { state.q = input.value; state.page = 1; render(); }, 120);
+  });
+  select.addEventListener('change', function () { state.cat = select.value; state.page = 1; render(); });
+
+  render();
+})();
+</script>
+{{ end }}

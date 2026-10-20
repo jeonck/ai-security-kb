@@ -113,3 +113,26 @@ nav a:hover { color: var(--accent); }
 .pipe-split { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 @media (max-width: 560px) { .pipe-split { grid-template-columns: 1fr; } }
 .pipe-note { color: var(--muted); font-size: .85rem; margin-top: 12px; }
+
+/* catalog controls + pagination */
+.cat-bar { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: flex-end; margin: 8px 0 12px; }
+.cat-field { display: flex; flex-direction: column; gap: 4px; font-size: .78rem; color: var(--muted); font-family: var(--mono); flex: 1 1 200px; }
+.cat-field input, .cat-field select {
+  font: 15px var(--sans); color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%;
+}
+.cat-field input:focus, .cat-field select:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+.cat-count { flex: 1 1 100%; margin: 0; font-size: .82rem; color: var(--muted); font-family: var(--mono); }
+.catalog .cat-table table { margin: 0; }
+.cat-empty { margin: 12px 0; }
+.pager { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: center; margin: 18px 0 6px; }
+.pager a, .pager button, .pager span {
+  min-width: 36px; height: 36px; padding: 0 10px; display: inline-grid; place-items: center;
+  border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  font: 14px var(--mono); text-decoration: none; cursor: pointer;
+}
+.pager a:hover, .pager button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.pager .is-current { background: var(--accent); border-color: var(--accent); color: var(--surface); cursor: default; }
+.pager .is-disabled, .pager button:disabled { opacity: .45; cursor: default; }
+.pager .pager-gap { border: 0; background: none; min-width: 20px; cursor: default; }
+.pager-info { text-align: center; margin: 0 0 8px; }

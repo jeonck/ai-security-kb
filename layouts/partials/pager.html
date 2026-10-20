@@ -1,0 +1,20 @@
+{{- $p := . -}}
+{{- if gt $p.TotalPages 1 }}
+<nav class="pager" aria-label="목록 페이지">
+  {{- if $p.HasPrev }}<a href="{{ $p.Prev.URL }}" aria-label="이전 페이지">‹ 이전</a>{{ else }}<span class="is-disabled">‹ 이전</span>{{ end }}
+  {{- $cur := $p.PageNumber }}
+  {{- $last := 0 }}
+  {{- range $p.Pagers }}
+    {{- $n := .PageNumber }}
+    {{- if or (eq $n 1) (eq $n $p.TotalPages) (le (sub $n $cur) 1) }}
+      {{- if or (eq $n 1) (eq $n $p.TotalPages) (ge (sub $n $cur) -1) }}
+        {{- if and (gt $last 0) (gt (sub $n $last) 1) }}<span class="pager-gap">…</span>{{ end }}
+        {{- if eq $n $cur }}<span class="is-current" aria-current="page">{{ $n }}</span>{{ else }}<a href="{{ .URL }}" aria-label="{{ $n }}페이지">{{ $n }}</a>{{ end }}
+        {{- $last = $n }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+  {{- if $p.HasNext }}<a href="{{ $p.Next.URL }}" aria-label="다음 페이지">다음 ›</a>{{ else }}<span class="is-disabled">다음 ›</span>{{ end }}
+</nav>
+<p class="muted pager-info">{{ $p.TotalNumberOfElements }}건 · {{ $cur }} / {{ $p.TotalPages }} 페이지</p>
+{{- end }}

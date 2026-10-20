@@ -10,12 +10,16 @@
   {{ end }}
 </div>
 {{ else }}
-{{ range .Pages.ByDate.Reverse }}
+{{ $pag := .Paginate .Pages.ByDate.Reverse }}
+{{ range $pag.Pages }}
 <a class="card" href="{{ .RelPermalink }}">
   <span class="card-date">{{ .Date.Format "2006-01-02" }}{{ with .Params.items }} · {{ . }}건{{ end }}</span>
   <span class="card-title">{{ .Title }}</span>
   {{ with .Description }}<span class="card-summary">{{ . }}</span>{{ end }}
 </a>
+{{ else }}
+<p class="muted">아직 문서가 없습니다.</p>
 {{ end }}
+{{ partial "pager.html" $pag }}
 {{ end }}
 {{ end }}
