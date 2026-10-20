@@ -17,7 +17,7 @@ description: "AI 보안 리서치 조교의 구조, 실행 흐름, 실제로 쓰
 |---|---|---|
 | AI 보안 리서치 조교 | 6시간마다 도는 뉴스 수집 (병렬 리서처 4명 + 코디네이터) | [프롬프트 전문](assistant/) |
 | AI 보안 기초 문헌 수집 | 매주 화·금, 집필 매트릭스의 빈 칸을 채울 고전·표준 | [프롬프트 전문](foundation/) |
-| AI 보안 주간 심층 리포트 | 매주 월 07:44 CT, 지난 7일을 deep-research 방식으로 종합 + 책 관점 | [프롬프트 전문](weekly-report/) |
+| AI 보안 주간 심층 리포트 | 매주 월 07:44 CT, 딥 리서치 스킬로 한 주 종합 + 심층 후보 분석 + 책 관점 | [프롬프트 전문](weekly-report/) · [딥 리서치가 쓰이는 곳](deep-research/) |
 | 항목 (`content/items/`) | 지식 베이스의 기본 단위. 출처 서지·주장별 원문 위치·두 축 태그 | [형식](https://github.com/jeonck/ai-security-kb/blob/main/docs/item-format.md) |
 | `data/axes.yaml` | 책의 뼈대인 두 축(생명주기·통제 계층)의 정의 | [집필 매트릭스](../book/matrix/) |
 | `CLAUDE.md` | 세 작업이 매번 먼저 읽는 규칙의 원본 | [레포](https://github.com/jeonck/ai-security-kb/blob/main/CLAUDE.md) |

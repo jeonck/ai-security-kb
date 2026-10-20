@@ -1,0 +1,28 @@
+<div class="pipe" role="img" aria-label="심층 후보가 딥 리서치로 넘어가는 흐름: 6시간 수집에서 심층 후보 표시, 월요일 주간 리포트가 후보를 골라 딥 리서치로 분석, 리포트와 항목 갱신">
+  <div class="pipe-step">
+    <span class="pipe-no">1</span>
+    <div><b>6시간 수집 — 카드 작성 + 심층 후보 표시</b><span>조사원 4명이 새 사건을 1차 원문까지 확인해 항목 카드로 남긴다. 코디네이터가 기준에 맞는 사건에 <code>deep_dive: true</code>와 이유를 단다 (보통 0~2건). 알림에 🔎 표시</span></div>
+  </div>
+  <div class="pipe-arrow">↓ 한 주 동안 후보가 쌓인다</div>
+  <div class="pipe-step pipe-fan">
+    <span class="pipe-no">2</span>
+    <div>
+      <b>월요일 주간 리포트 — 딥 리서치 스킬 실행</b><span><code>kb.py deep-dives</code>로 아직 다루지 않은 후보 중 최대 2건을 고르고, 딥 리서치 조사원을 동시에 보낸다</span>
+      <div class="pipe-grid">
+        <span>흐름 조사원 3~4명 — 한 주의 흐름</span><span>심층 조사원 후보당 1명 — 원인·엇갈림·후속·반론·대응</span>
+      </div>
+    </div>
+  </div>
+  <div class="pipe-arrow">↓</div>
+  <div class="pipe-split">
+    <div class="pipe-step">
+      <span class="pipe-no">3</span>
+      <div><b>주간 리포트</b><span>"심층 분석: &lt;ID&gt;" 절 + 핵심 흐름 + 점검 항목 + 책 관점. front matter <code>deep_dives</code>에 다룬 ID 기록</span></div>
+    </div>
+    <div class="pipe-step">
+      <span class="pipe-no">4</span>
+      <div><b>항목 갱신</b><span>틀린 사실·새 후속을 항목 카드에 반영. 항목 페이지에 "심층 분석" 링크가 생기고, 다음 주 후보 목록에서 빠진다</span></div>
+    </div>
+  </div>
+  <p class="pipe-note">급한 사건은 월요일을 기다리지 않고 채팅에서 "AISEC-… 깊게 조사해줘"로 바로 딥 리서치를 돌린다. 다루지 못한 후보는 다음 주로 넘어간다.</p>
+</div>
