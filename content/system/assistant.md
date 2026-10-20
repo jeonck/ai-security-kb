@@ -60,7 +60,7 @@ Agent 도구(subagent_type="general-purpose", run_in_background=false)로 아래
 ## 3. 기록·검증·커밋 (새 항목이 1개 이상일 때만 — 0개면 아무 파일도 바꾸지 않고 커밋하지 않는다)
 - `python3 scripts/kb.py next-id` 로 시작 번호를 받아 순서대로 ID를 매기고 `content/items/<ID>.md` 로 저장한다(파일명=id).
 - 기존 항목 중 이번에 원문을 확인한 것(status unverified/partial)은 그 파일을 보완하고 status를 올린다.
-- 다이제스트: CLAUDE.md 형식대로 `content/digest/<오늘>.md` 생성 또는 `## 수집 (HH:MM CT)` 절을 붙인다(큰 그림 2~3줄 + `{{< items ... >}}`). `data/state.yaml` 의 last_run·runs 갱신.
+- 다이제스트: CLAUDE.md 형식대로 `content/digest/<오늘>.md` 생성 또는 `## 수집 (HH:MM CT)` 절을 붙인다(큰 그림 2~3줄 + `{{</* items ... */>}}`). `data/state.yaml` 의 last_run·runs 갱신.
 - `./scripts/check.sh` (hugo가 없으면 먼저 `pip install hugo --break-system-packages -q`). 마지막 줄이 OK여야 커밋한다. 실패하면 콘텐츠를 고쳐 재실행(스크립트·레이아웃·설정·axes.yaml·book/·system/ 수정 금지).
 - 바꾼 파일만 add → 커밋 `digest: <YYYY-MM-DD HH:MM> CT — N건 추가` → `main` 푸시(거절되면 `git pull --rebase` 후 재검증·재푸시).
 - 프로젝트 사본: CLAUDE.md의 "claude.ai 프로젝트 사본" 절차대로 export-day·export-index 결과를 `project_write`(local_path). 실패해도 레포 커밋은 유지하고 보고에 적는다.
