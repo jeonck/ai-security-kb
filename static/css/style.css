@@ -89,3 +89,27 @@ nav a:hover { color: var(--accent); }
 .prose hr { border: 0; border-top: 1px dashed var(--line); margin: 32px 0; }
 
 .site-footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 24px 0 40px; font-size: .85rem; color: var(--ink-2); }
+
+/* system section: pipeline diagram */
+.pipe { margin: 24px 0; }
+.pipe-step {
+  display: flex; gap: 12px; align-items: flex-start;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px;
+}
+.pipe-step b { display: block; }
+.pipe-step span:not(.pipe-no) { display: block; color: var(--ink-2); font-size: .88rem; }
+.pipe-step code { font-family: var(--mono); font-size: .82em; background: var(--code-bg); padding: 0 4px; border-radius: 4px; }
+.pipe-no {
+  flex: 0 0 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--accent); color: var(--surface); font-family: var(--mono); font-size: .8rem; font-weight: 600;
+}
+.pipe-arrow { text-align: center; color: var(--muted); font-family: var(--mono); line-height: 1.6; }
+.pipe-fan { border-color: var(--accent); }
+.pipe-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
+.pipe-grid span {
+  font-size: .8rem !important; text-align: center; padding: 6px; border-radius: 6px;
+  background: var(--accent-soft); color: var(--accent) !important;
+}
+.pipe-split { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 560px) { .pipe-split { grid-template-columns: 1fr; } }
+.pipe-note { color: var(--muted); font-size: .85rem; margin-top: 12px; }

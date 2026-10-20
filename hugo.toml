@@ -49,3 +49,7 @@ summaryLength = 40
     name = "카테고리"
     pageRef = "/categories"
     weight = 40
+  [[menus.main]]
+    name = "시스템"
+    pageRef = "/system"
+    weight = 50

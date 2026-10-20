@@ -1,0 +1,17 @@
+{{ define "main" }}
+<header class="page-head">
+  <p class="eyebrow">SYSTEM</p>
+  <h1>{{ .Title }}</h1>
+  {{ with .Description }}<p class="lede">{{ . }}</p>{{ end }}
+</header>
+<div class="prose">{{ .Content }}</div>
+<section class="block">
+  <h2 class="block-title">시스템 문서</h2>
+  {{ range .Pages.ByWeight }}
+  <a class="card" href="{{ .RelPermalink }}">
+    <span class="card-title">{{ .Title }}</span>
+    {{ with .Description }}<span class="card-summary">{{ . }}</span>{{ end }}
+  </a>
+  {{ end }}
+</section>
+{{ end }}

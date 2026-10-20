@@ -16,6 +16,7 @@
 | `content/catalog.md` | 지금까지 수집한 모든 항목의 표(최신순)와 "후속 추적 목록". **중복 판정 기준** |
 | `content/digest/YYYY-MM-DD.md` | 그날 수집한 항목. 같은 날 여러 번 실행되면 같은 파일에 이어 붙인다 |
 | `content/weekly/YYYY-Www.md` | 주간 심층 리포트 (ISO 주차) |
+| `content/system/` | 시스템 설명·프롬프트·구축 기록 페이지. 사람이 관리하며 **스케줄 작업은 수정하지 않는다** |
 | `layouts/`, `static/`, `hugo.toml`, `.github/`, `scripts/` | 사이트 틀. **스케줄 작업은 수정하지 않는다** |
 
 ## 날짜
