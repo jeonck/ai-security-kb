@@ -19,7 +19,7 @@
 | `content/weekly/YYYY-Www.md` | 주간 심층 리포트 | 주간 작업 |
 | `data/state.yaml` | 마지막 수집 시각(`last_run`)과 실행 기록(`runs`) | 수집·기초 문헌 작업 |
 | `data/axes.yaml` | 두 축·유형·분류·출처 등급의 정의 | **저자만** |
-| `content/book/` | 책 개요·목차 초안·집필 매트릭스 | **저자만** (근거 목록은 자동) |
+| `content/book/` | 책 개요·목차(`outline.md`)·목차 설계 근거(`outline-research.md`)·집필 매트릭스 | **저자만** (근거 목록은 자동). 목차를 크게 고칠 때는 채팅에서 딥 리서치로 근거를 모은다 |
 | `content/system/` | 시스템 설명·프롬프트·구축 기록 | **저자만** |
 | `content/catalog.md`, `content/references.md`, `content/lifecycle/`, `content/controls/` | 자동 생성 페이지의 틀 | **저자만** |
 | `layouts/`, `static/`, `hugo.toml`, `.github/`, `scripts/`, `docs/` | 사이트 틀·도구·형식 문서 | **저자만** |
@@ -43,7 +43,7 @@
 - `status: confirmed`는 1등급 1차 원문을 열어 주요 주장을 확인했을 때만. 아니면 `partial`/`unverified`와 `followup`.
 - **주장(claims)** 2~8개: 한국어로 다시 쓴 문장, 정확한 수치, 실제로 읽은 출처 key, 원문 안 위치(locator), 변하는 수치에는 `as_of`. 인용문은 저장하지 않는다.
 - 출처 메타데이터: 원제 그대로, 매체, 저자, 발행일, URL, 열람일(`accessed`, 실제로 연 날짜).
-- `book_note`: 이 항목이 책의 어느 논지·장에서 쓰일지 한두 문장 (`content/book/outline.md`의 장 구성을 참고).
+- `book_note`: 이 항목이 책의 어느 논지·장에서 쓰일지 한두 문장 (`content/book/outline.md`의 장 번호·제목을 그대로 쓴다).
 - **심층 후보(`deep_dive: true` + `deep_dive_reason`)**: 카드 한 장으로는 부족해 원인·후속·반론까지 파야 하는 사건에만 단다. 기준은 실제 악용 확인 / 영향 범위가 큼 / 새 공격 유형 / 책의 장을 바꿀 만함 (상세: `docs/item-format.md`). 한 번의 수집에서 0~2건이 보통이다. 다음 주간 리포트가 딥 리서치로 파고든다.
 - YAML 문자열 안에 큰따옴표를 쓰지 않는다(‘ ’ 사용). 깨진 front matter는 validate가 실패로 잡는다.
 - 본문: `## 요약` · `## 동작 원리`(직관적으로) · `## 플랫폼 엔지니어 관점`(Kubernetes·CI/CD·에이전트 플랫폼 팀의 구체 행동).
@@ -108,7 +108,7 @@ deep_dives: ["AISEC-2026-0014"]   # 이번 리포트에서 심층 분석한 항�
 
 - `track: foundation`, `item_type: 기초 문헌`. 발행일 제한이 없다 (오래된 고전 논문·표준도 대상).
 - 대상: 동료 심사 논문·arXiv 원 논문, 표준·프레임워크 문서(OWASP, NIST AI RMF·AI 100-2, MITRE ATLAS, CSA 등), 정부·주요 기관 보고서. 1등급 원문만. 블로그 요약은 대상이 아니다.
-- 고르는 기준: `python3 scripts/kb.py coverage` 의 빈 칸·1건뿐인 칸, 그리고 `content/book/outline.md`에서 "근거 부족"이 뜨는 장. 실행당 3~5건.
+- 고르는 기준: 먼저 `content/book/outline.md`의 "기초 문헌 수집 우선순위" 표를 위에서부터 본다(이미 항목이 있으면 `kb.py find`로 확인하고 건너뛴다). 그다음 `python3 scripts/kb.py coverage` 의 빈 칸·1건뿐인 칸, outline.md에서 "근거 부족"이 뜨는 장. 실행당 3~5건.
 - 논문은 identifiers.arxiv/doi와 저자 전원, locator는 절·표·그림 번호로.
 
 ## 수집 공통 규칙
