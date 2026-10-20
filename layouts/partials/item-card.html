@@ -1,0 +1,13 @@
+{{- /* 항목 카드. 입력: 항목 페이지 */ -}}
+{{- $p := . -}}
+<article class="item-card">
+  <p class="item-meta">
+    <span class="item-id">{{ $p.Params.id }}</span>
+    <span>{{ $p.Date.Format "2006-01-02" }}</span>
+    <span>{{ $p.Params.item_type }}</span>
+    {{ partial "status-badge.html" $p }}
+  </p>
+  <h3 class="item-title"><a href="{{ $p.RelPermalink }}">{{ $p.Title }}</a></h3>
+  <p class="item-summary">{{ $p.Params.summary }}</p>
+  {{ partial "axis-chips.html" $p }}
+</article>

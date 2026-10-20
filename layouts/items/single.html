@@ -1,0 +1,78 @@
+{{ define "main" }}
+{{- $p := . -}}
+{{- $srcs := dict -}}
+{{- range .Params.sources }}{{ $srcs = merge $srcs (dict .key .) }}{{ end -}}
+<article class="item-page">
+  <header class="page-head">
+    <p class="eyebrow">{{ .Params.id }} · {{ .Params.item_type }} · {{ .Date.Format "2006-01-02" }}{{ if ne .Params.date_precision "day" }} ({{ if eq .Params.date_precision "month" }}월 단위{{ else }}연 단위{{ end }}){{ end }}</p>
+    <h1>{{ .Title }}</h1>
+    <p class="lede">{{ .Params.summary }}</p>
+    <p class="item-meta">{{ partial "status-badge.html" . }}
+      {{ range .GetTerms "categories" }}<a class="chip" href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>{{ end }}
+      {{ with .Params.identifiers }}{{ range .cve }}<code>{{ . }}</code> {{ end }}{{ range .ghsa }}<code>{{ . }}</code> {{ end }}{{ range .arxiv }}<code>arXiv:{{ . }}</code> {{ end }}{{ range .doi }}<code>doi:{{ . }}</code> {{ end }}{{ end }}
+    </p>
+    {{ partial "axis-chips.html" . }}
+  </header>
+
+  {{ with .Params.book_note }}
+  <aside class="callout"><b>집필 메모</b> {{ . }}</aside>
+  {{ end }}
+
+  <div class="prose">{{ .Content }}</div>
+
+  <section class="block">
+    <h2 class="block-title">인용할 수 있는 주장</h2>
+    <div class="prose">
+    <table class="claims">
+      <thead><tr><th>#</th><th>주장</th><th>출처 · 위치</th></tr></thead>
+      <tbody>
+      {{- range $i, $c := .Params.claims }}
+        {{- $s := index $srcs $c.source }}
+        <tr id="c{{ add $i 1 }}">
+          <td class="mono">C{{ add $i 1 }}</td>
+          <td>{{ $c.text }}{{ with $c.as_of }} <span class="muted">(기준일 {{ . }})</span>{{ end }}</td>
+          <td><a href="{{ $s.url }}">{{ $s.outlet }}</a>{{ if eq $s.role "primary" }} <span class="badge badge-ok">1차</span>{{ end }}<br><span class="muted">{{ $c.locator }}</span></td>
+        </tr>
+      {{- end }}
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2 class="block-title">출처</h2>
+    <ol class="sources">
+    {{- range .Params.sources }}
+      <li id="src-{{ .key }}">
+        <span class="badge {{ if eq .tier 1 }}badge-ok{{ else if eq .tier 2 }}badge-mid{{ else }}badge-no{{ end }}">{{ .tier }}등급 · {{ if eq .role "primary" }}1차 원문{{ else }}보도·해설{{ end }}</span>
+        {{ with .authors }}{{ delimit . ", " }}. {{ end }}<a href="{{ .url }}">{{ .title }}</a>. {{ .outlet }}{{ with .published }}, {{ . | time.Format "2006-01-02" }}{{ end }}.
+        <span class="muted">열람 {{ .accessed | time.Format "2006-01-02" }} · 키 <code>{{ replace (lower $p.Params.id) "-" "" }}{{ .key }}</code></span>
+      </li>
+    {{- end }}
+    </ol>
+  </section>
+
+  <section class="block">
+    <h2 class="block-title">이 항목 인용하기</h2>
+    <div class="prose">
+    <pre><code>{{ $p.Params.id }}. 「{{ $p.Title }}」. AI Security KB, {{ $p.Params.collected | time.Format "2006-01-02" }} 수집. {{ $p.Permalink }}</code></pre>
+    <p class="muted">책에는 위 지식 베이스 대신 <b>1차 원문</b>을 인용하세요. 각 원문의 BibTeX 키는 출처 목록에 있고, 전체 참고문헌은 <a href="{{ "references/" | relURL }}">참고문헌</a>에서 내려받을 수 있습니다.</p>
+    </div>
+  </section>
+
+  {{ with .Params.followup }}
+  <aside class="callout callout-warn"><b>후속 추적</b> {{ . }}</aside>
+  {{ end }}
+
+  {{ with .Params.related }}
+  <section class="block">
+    <h2 class="block-title">관련 항목</h2>
+    <div class="item-list">
+    {{ range . }}{{ with site.GetPage (printf "/items/%s" .) }}{{ partial "item-card.html" . }}{{ end }}{{ end }}
+    </div>
+  </section>
+  {{ end }}
+
+  {{ with .GitInfo }}<p class="muted">마지막 커밋 <a href="{{ site.Params.repo }}/commit/{{ .Hash }}">{{ .AbbreviatedHash }}</a> · <a href="{{ site.Params.repo }}/commits/main/{{ $p.File.Path | replaceRE "^" "content/" }}">이 항목의 변경 이력</a></p>{{ end }}
+</article>
+{{ end }}

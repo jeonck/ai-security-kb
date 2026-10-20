@@ -1,0 +1,29 @@
+{{ define "main" }}
+{{- $items := (where site.RegularPages "Section" "items").ByDate.Reverse -}}
+{{- $all := slice -}}
+{{- range $it := $items }}{{ range $it.Params.sources }}{{ $all = $all | append (dict "s" . "it" $it) }}{{ end }}{{ end -}}
+<header class="page-head">
+  <h1>{{ .Title }}</h1>
+  {{ with .Description }}<p class="lede">{{ . }}</p>{{ end }}
+  <p class="muted">출처 {{ len $all }}개 · 1등급 {{ len (where $all "s.tier" 1) }} · 2등급 {{ len (where $all "s.tier" 2) }} · 3등급 {{ len (where $all "s.tier" 3) }}</p>
+  <p class="dl-links"><a class="chip" href="{{ "references.bib" | relURL }}" download>BibTeX 내려받기</a> <a class="chip" href="{{ "references.json" | relURL }}" download>CSL-JSON 내려받기</a></p>
+</header>
+<div class="prose">{{ .Content }}</div>
+{{- range $tier := slice 1 2 3 }}
+  {{- $group := where $all "s.tier" $tier }}
+  {{- if $group }}
+  <section class="block">
+    <h2 class="block-title">{{ index site.Data.axes.tiers (string $tier) | default (printf "%d등급" $tier) }}</h2>
+    <ol class="sources">
+    {{- range sort $group "s.outlet" }}
+      {{- $s := .s }}{{ $it := .it }}
+      <li>
+        {{ with $s.authors }}{{ delimit . ", " }}. {{ end }}<a href="{{ $s.url }}">{{ $s.title }}</a>. {{ $s.outlet }}{{ with $s.published }}, {{ . | time.Format "2006-01-02" }}{{ end }}.
+        <span class="muted">{{ if eq $s.role "primary" }}1차 원문{{ else }}보도·해설{{ end }} · 열람 {{ $s.accessed | time.Format "2006-01-02" }} · <a href="{{ $it.RelPermalink }}">{{ $it.Params.id }}</a> · <code>{{ replace (lower $it.Params.id) "-" "" }}{{ $s.key }}</code></span>
+      </li>
+    {{- end }}
+    </ol>
+  </section>
+  {{- end }}
+{{- end }}
+{{ end }}

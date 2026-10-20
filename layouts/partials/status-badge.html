@@ -1,0 +1,4 @@
+{{- $s := .Params.status -}}
+{{- if eq $s "confirmed" }}<span class="badge badge-ok" title="주요 주장을 1차 원문에서 확인">1차 확인</span>
+{{- else if eq $s "partial" }}<span class="badge badge-mid" title="일부 주장만 원문 확인 또는 1차 원문 없음">부분 확인</span>
+{{- else }}<span class="badge badge-no" title="원문을 열지 못함">원문 미확인</span>{{ end -}}

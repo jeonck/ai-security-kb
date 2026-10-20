@@ -136,3 +136,61 @@ nav a:hover { color: var(--accent); }
 .pager .is-disabled, .pager button:disabled { opacity: .45; cursor: default; }
 .pager .pager-gap { border: 0; background: none; min-width: 20px; cursor: default; }
 .pager-info { text-align: center; margin: 0 0 8px; }
+
+/* items, badges, axes */
+.item-list { display: grid; gap: 10px; }
+.item-card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+.item-card:hover { border-color: var(--accent); }
+.item-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 4px; font-family: var(--mono); font-size: .75rem; color: var(--muted); }
+.item-id { color: var(--accent); font-weight: 600; }
+.item-title { font-size: 1.02rem; margin: 2px 0 4px; line-height: 1.45; }
+.item-title a { text-decoration: none; }
+.item-title a:hover { color: var(--accent); }
+.item-summary { margin: 0 0 6px; color: var(--ink-2); font-size: .9rem; }
+.badge { display: inline-block; font-family: var(--mono); font-size: .7rem; padding: 1px 7px; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
+.badge-ok { color: #15803d; }
+.badge-mid { color: #b45309; }
+.badge-no { color: #b91c1c; }
+@media (prefers-color-scheme: dark) { .badge-ok { color: #4ade80; } .badge-mid { color: #fbbf24; } .badge-no { color: #f87171; } }
+.chip-lc { background: var(--accent-soft); color: var(--accent); }
+.chip-ctl { background: var(--code-bg); color: var(--ink-2); border: 1px solid var(--line); }
+.chip-empty { background: transparent; color: var(--muted); border: 1px dashed var(--line); }
+.axis-chips { margin: 4px 0 0; }
+.axis-label { font-family: var(--mono); font-size: .75rem; color: var(--muted); margin: 14px 0 0; }
+.callout { background: var(--accent-soft); border-left: 4px solid var(--accent); border-radius: 8px; padding: 10px 14px; margin: 16px 0; font-size: .92rem; }
+.callout-warn { background: var(--code-bg); border-left-color: var(--muted); }
+.mono { font-family: var(--mono); font-size: .82rem; white-space: nowrap; }
+.claims td:first-child { width: 2.5em; }
+.claims td:last-child { width: 30%; font-size: .82rem; }
+.sources { padding-left: 1.4em; font-size: .9rem; }
+.sources li { margin: 8px 0; }
+.sources a { color: var(--accent); }
+.followups { font-size: .9rem; padding-left: 1.2em; }
+.followups a { color: var(--accent); font-family: var(--mono); font-size: .82rem; }
+.evidence { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; margin: 10px 0 24px; font-size: .9rem; }
+.evidence-thin { border-style: dashed; }
+.evidence-head { margin: 0 0 4px; font-family: var(--mono); font-size: .78rem; color: var(--muted); }
+.evidence-thin .evidence-head b { color: #b45309; }
+.evidence ul { margin: 0; padding-left: 1.1em; }
+.evidence a { color: var(--accent); font-family: var(--mono); font-size: .8rem; }
+.dl-links { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* matrix */
+.matrix-wrap { overflow-x: auto; margin: 16px 0; }
+.matrix { border-collapse: separate; border-spacing: 4px; width: 100%; min-width: 640px; font-size: .82rem; }
+.matrix th { font-weight: 600; text-align: center; padding: 6px 4px; font-size: .78rem; }
+.matrix th a { text-decoration: none; }
+.matrix th a:hover { color: var(--accent); }
+.matrix tbody th { text-align: left; white-space: nowrap; }
+.mx-corner { color: var(--muted); font-family: var(--mono); font-weight: 400 !important; text-align: left !important; }
+.mx-cell { border-radius: 8px; padding: 8px 6px; text-align: center; vertical-align: top; border: 1px solid var(--line); }
+.mx-0 { background: transparent; border-style: dashed; }
+.mx-1 { background: color-mix(in srgb, var(--accent) 12%, var(--surface)); }
+.mx-2 { background: color-mix(in srgb, var(--accent) 28%, var(--surface)); }
+.mx-3 { background: color-mix(in srgb, var(--accent) 48%, var(--surface)); }
+.mx-n { display: block; font-family: var(--mono); font-size: 1.05rem; font-weight: 600; text-decoration: none; }
+.mx-ids { display: flex; flex-wrap: wrap; gap: 2px 4px; justify-content: center; margin-top: 2px; }
+.mx-ids a, .mx-ids span { font-family: var(--mono); font-size: .66rem; color: var(--ink-2); text-decoration: none; }
+.mx-ids a:hover { color: var(--accent); text-decoration: underline; }
+.mx-empty { color: var(--muted); }
+.mx-total { font-family: var(--mono); color: var(--muted); text-align: center; }

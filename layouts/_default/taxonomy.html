@@ -1,0 +1,30 @@
+{{ define "main" }}
+{{- if eq .Kind "term" }}
+<header class="page-head">
+  <p class="eyebrow">{{ with .Parent }}{{ .Title }}{{ end }}</p>
+  <h1>{{ .Title }}</h1>
+  {{ with .Description }}<p class="lede">{{ . }}</p>{{ end }}
+  {{- $items := where .Pages "Section" "items" }}
+  <p class="muted">항목 {{ len $items }}건 · <a href="{{ "book/matrix/" | relURL }}">집필 매트릭스에서 보기</a></p>
+</header>
+{{ $pag := .Paginate (where .Pages "Section" "items").ByDate.Reverse 20 }}
+<div class="item-list">
+{{ range $pag.Pages }}{{ partial "item-card.html" . }}{{ end }}
+</div>
+{{ partial "pager.html" $pag }}
+{{- else }}
+<header class="page-head">
+  <h1>{{ .Title }}</h1>
+  {{ with .Description }}<p class="lede">{{ . }}</p>{{ end }}
+</header>
+<div class="item-list">
+{{ range .Data.Terms.ByCount }}
+  <a class="card" href="{{ .Page.RelPermalink }}">
+    <span class="card-date">{{ .Count }}건</span>
+    <span class="card-title">{{ .Page.Title }}</span>
+    {{ with .Page.Description }}<span class="card-summary">{{ . }}</span>{{ end }}
+  </a>
+{{ end }}
+</div>
+{{- end }}
+{{ end }}

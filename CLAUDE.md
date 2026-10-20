@@ -1,81 +1,81 @@
 # AI Security KB — 작업 사양
 
-이 레포는 AI 보안 뉴스·연구를 자동 수집·요약해 쌓는 지식 베이스이자 Hugo 사이트
-(https://jeonck.github.io/ai-security-kb/)다. 두 스케줄 작업이 이 문서를 읽고 따른다.
-**이 문서가 형식·규칙의 원본이다.** claude.ai 프로젝트 "리서치"의 `ai-security/` 문서는 이 레포의 사본이다.
+이 레포는 **한국어 책 집필을 위한** AI 보안 지식 베이스이자 Hugo 사이트(https://jeonck.github.io/ai-security-kb/)다.
+책의 대상은 AI 서비스·에이전트를 운영하는 플랫폼 엔지니어·SRE·DevSecOps이고, 뼈대는 **생명주기 × 통제 계층** 두 축이다.
+스케줄 작업들은 이 문서를 먼저 읽고 따른다. **이 문서가 규칙의 원본이다.** claude.ai 프로젝트 "리서치"의 `ai-security/` 문서는 사본이다.
 
 | 작업 | 주기 | 하는 일 |
 |---|---|---|
-| AI 보안 리서치 조교 | 6시간마다 | 4개 도메인 병렬 수집 → 검증·중복 제거 → `content/digest/`, `content/catalog.md` 갱신 → 커밋·푸시 → 프로젝트 사본 갱신 |
-| AI 보안 주간 심층 리포트 | 매주 월 07:44 CT | 지난 7일 다이제스트 기반 심층 리서치 → `content/weekly/` → 커밋·푸시 → 프로젝트 사본 갱신 |
+| AI 보안 리서치 조교 | 6시간마다 | 새 뉴스·연구를 4개 도메인 병렬 수집 → 1차 출처 추적 → 항목 파일 작성 → 다이제스트 → 커밋·푸시 → 프로젝트 사본 |
+| AI 보안 기초 문헌 수집 | 매주 화·금 | 집필 매트릭스의 빈 칸·얇은 칸을 채울 기초 문헌(논문·표준·주요 보고서)을 항목으로 추가 |
+| AI 보안 주간 심층 리포트 | 매주 월 07:44 CT | 지난 7일 항목을 출발점으로 심층 리서치 → `content/weekly/` (책 관점 절 포함) |
 
 ## 파일 구조
 
-| 경로 | 역할 |
-|---|---|
-| `content/catalog.md` | 지금까지 수집한 모든 항목의 표(최신순)와 "후속 추적 목록". **중복 판정 기준** |
-| `content/digest/YYYY-MM-DD.md` | 그날 수집한 항목. 같은 날 여러 번 실행되면 같은 파일에 이어 붙인다 |
-| `content/weekly/YYYY-Www.md` | 주간 심층 리포트 (ISO 주차) |
-| `content/system/` | 시스템 설명·프롬프트·구축 기록 페이지. 사람이 관리하며 **스케줄 작업은 수정하지 않는다** |
-| `layouts/`, `static/`, `hugo.toml`, `.github/`, `scripts/` | 사이트 틀. **스케줄 작업은 수정하지 않는다** |
+| 경로 | 역할 | 누가 바꾸나 |
+|---|---|---|
+| `content/items/AISEC-YYYY-NNNN.md` | **항목**: 지식 베이스의 기본 단위. 형식은 `docs/item-format.md` | 스케줄 작업, 저자 |
+| `content/digest/YYYY-MM-DD.md` | 그날의 수집 기록: 실행별 "큰 그림" + 항목 목록 (`{{< items ... >}}`) | 스케줄 작업 |
+| `content/weekly/YYYY-Www.md` | 주간 심층 리포트 | 주간 작업 |
+| `data/state.yaml` | 마지막 수집 시각(`last_run`)과 실행 기록(`runs`) | 수집·기초 문헌 작업 |
+| `data/axes.yaml` | 두 축·유형·분류·출처 등급의 정의 | **저자만** |
+| `content/book/` | 책 개요·목차 초안·집필 매트릭스 | **저자만** (근거 목록은 자동) |
+| `content/system/` | 시스템 설명·프롬프트·구축 기록 | **저자만** |
+| `content/catalog.md`, `content/references.md`, `content/lifecycle/`, `content/controls/` | 자동 생성 페이지의 틀 | **저자만** |
+| `layouts/`, `static/`, `hugo.toml`, `.github/`, `scripts/`, `docs/` | 사이트 틀·도구·형식 문서 | **저자만** |
+
+스케줄 작업이 바꿔도 되는 것은 `content/items/`, `content/digest/`, `content/weekly/`, `data/state.yaml` 뿐이다.
 
 ## 날짜
 
-- 날짜는 반드시 명령 출력으로 정한다: `TZ=America/Chicago date +%F`, `TZ=America/Chicago date +%Y-%m-%dT%H:%M:%S%:z`, 주차는 `TZ=America/Chicago date +%G-W%V`.
+- 날짜·시각은 반드시 명령 출력으로 정한다: `TZ=America/Chicago date +%F`, `TZ=America/Chicago date '+%F %H:%M'`, `TZ=America/Chicago date +%Y-%m-%dT%H:%M:%S%:z`, 주차 `TZ=America/Chicago date +%G-W%V`.
 - 샌드박스 시계는 UTC라 저녁에는 하루 앞서 있다. 파일명·커밋 이력·추론으로 날짜를 정하지 않는다.
 
-## 카테고리 (7개, front matter의 categories에 이 문자열 그대로)
+## 두 축 (정의는 `data/axes.yaml`)
 
-1. `프롬프트 인젝션` — 직접/간접 인젝션, 데이터 유출 체인
-2. `에이전트·MCP 보안` — 코딩 에이전트, 도구 호출, MCP 서버/SDK, 인증·권한
-3. `모델 공격 연구` — 탈옥, 적대적 예제, 백도어, 모델 추출, 정렬 우회 (주로 arXiv)
-4. `AI 공급망` — 악성 모델/패키지, 모델 레지스트리, 직렬화 취약점
-5. `개인정보·데이터 유출` — 학습 데이터·대화 로그 노출, AI 기업발 유출, 프라이버시 기법
-6. `AI 악용 공격` — 공격자가 AI를 무기로 쓴 사건 (자동화 침투, 딥페이크, 피싱)
-7. `규제·표준·거버넌스` — EU AI Act, NIST, CISA, OWASP, 각국 정책, 벤더 보안 정책
+- **생명주기** (`lifecycle`, 어디서 뚫리나): `data` 데이터 · `training` 학습·튜닝 · `serving` 서빙·추론 · `agent-runtime` 에이전트 런타임 · `supply-chain` 공급망·배포
+- **통제 계층** (`controls`, 무엇으로 막나): `identity` 신원·권한 · `network` 네트워크·egress · `isolation` 격리·실행 환경 · `provenance` 공급망·출처 · `detection` 탐지·평가 · `governance` 거버넌스·정책
+- 항목마다 생명주기 1~2개(중심 단계 먼저), 통제 1~3개("이 사례가 어떤 통제의 실패 또는 필요성을 보여주는가")를 단다. 거버넌스만 다는 것은 피하고, 정책이 요구하는 구체 통제를 함께 단다.
 
-## digest 문서 형식
+## 항목 작성 규칙 (상세 형식: `docs/item-format.md`)
 
-새 파일:
+- **1차 출처 추적**: 기사가 원 보고서·보안 권고(GHSA/CVE)·논문·공식 발표·관보에 링크하면 그 원문을 열어 `role: primary, tier: 1`로 넣고, 기사는 `coverage`로 남긴다. 같은 사실을 1·2등급이 다루면 3등급(집계 블로그·주간 정리)은 넣지 않는다.
+- `status: confirmed`는 1등급 1차 원문을 열어 주요 주장을 확인했을 때만. 아니면 `partial`/`unverified`와 `followup`.
+- **주장(claims)** 2~8개: 한국어로 다시 쓴 문장, 정확한 수치, 실제로 읽은 출처 key, 원문 안 위치(locator), 변하는 수치에는 `as_of`. 인용문은 저장하지 않는다.
+- 출처 메타데이터: 원제 그대로, 매체, 저자, 발행일, URL, 열람일(`accessed`, 실제로 연 날짜).
+- `book_note`: 이 항목이 책의 어느 논지·장에서 쓰일지 한두 문장 (`content/book/outline.md`의 장 구성을 참고).
+- 본문: `## 요약` · `## 동작 원리`(직관적으로) · `## 플랫폼 엔지니어 관점`(Kubernetes·CI/CD·에이전트 플랫폼 팀의 구체 행동).
+- 새 ID: `python3 scripts/kb.py next-id` (여러 개면 하나씩 늘려 쓴다). ID는 바꾸지 않는다.
+- **중복 판정**: 후보의 URL·제목 키워드·CVE/GHSA/arXiv ID로 `python3 scripts/kb.py find <...>` 를 돌린다. 같은 URL이나 같은 사건(같은 CVE/같은 제품의 같은 취약점)이 있으면 새 항목을 만들지 않는다. 패치·CVE 부여·실제 악용 확인 같은 중요한 후속은 제목을 "후속: …"으로 한 새 항목을 만들고 `related`로 원 항목을 잇는다. 원 항목의 `followup`을 정리한다.
+- 기존 항목의 "원문 미확인"·`partial`을 이번에 확인했으면 그 항목 파일을 보완하고 `status`를 올린다.
+
+## 다이제스트 형식
 
 ```
 ---
 title: "AI 보안 다이제스트 — YYYY-MM-DD"
-date: <TZ=America/Chicago date +%Y-%m-%dT%H:%M:%S%:z 출력>
+date: <그날 첫 실행의 date 명령 출력>
 slug: "YYYY-MM-DD"
 description: "<가장 큰 2~3건을 언급한 한 문장> 등 N건"
 items: N
-categories: [이 문서에 등장한 카테고리들]
-tags: [주요 태그 5~8개, 소문자-하이픈]
 ---
 
-## 이번 수집의 큰 그림
+## 수집 (HH:MM CT)
 
-- 항목들을 관통하는 흐름 2~3줄 (직관적으로)
+- 이번 묶음을 관통하는 흐름 2~3줄 (직관적으로)
 
----
-
-### [카테고리] 한 줄 제목
-- **날짜**: 원문 발행일 · **유형**: 뉴스 | 연구 | 권고 | 사고 | 표준·정책
-- **요약**: 무슨 일인지 2~3문장 (원문을 옮기지 말고 새로 쓴다)
-- **동작 원리/핵심**: 공격·발견의 메커니즘을 직관적으로 1~2문장
-- **플랫폼 엔지니어 관점**: 내 인프라에서 무엇을 점검/바꿔야 하는지 1~2문장
-- **태그**: #cve #mcp ...
-- **출처**: [매체/저자](URL)
+{{< items "AISEC-2026-0021" "AISEC-2026-0022" >}}
 ```
 
-같은 날 이미 파일이 있으면: 맨 끝에 `## 추가 수집 (HH:MM CT)` 섹션을 붙이고 그 아래 항목을 쓴다. front matter의 `items`(누적), `description`, `categories`, `tags`를 갱신하고 `date`는 바꾸지 않는다.
+- 같은 날 이미 파일이 있으면 맨 끝에 `## 수집 (HH:MM CT)` 절을 새로 붙이고, front matter의 `items`(누적)와 `description`을 갱신한다. `date`는 바꾸지 않는다.
+- 기초 문헌 작업은 절 제목을 `## 기초 문헌 (HH:MM CT)`로 한다.
+- 모든 항목은 적어도 한 다이제스트에 실려야 한다 (validate가 검사).
 
-## catalog.md 형식
+## state.yaml
 
-- 표 헤더 바로 아래에 새 행을 최신순으로 추가: `| 원문 발행일 | 카테고리 | 제목 | [링크](URL) | [YYYY-MM-DD](../digest/YYYY-MM-DD/) |`
-- 맨 위 "마지막 실행"(YYYY-MM-DD HH:MM CT)과 "누적 항목" 갱신
-- "후속 추적 목록" 정리: 해결된 건 삭제, 새로 생긴 건 추가
-- front matter(`layout: "catalog"` 포함)와 표의 열 구성은 바꾸지 않는다. 사이트의 검색·필터·페이징이 이 표를 그대로 읽는다
-- 기존 행은 지우지 않는다. 예외: "(원문 미확인)" 항목을 확인했으면 그 행의 제목에서 표시를 지우고 digest 본문도 보완한다
-- 맨 아래 `## 주간 리포트` 섹션: 주간 작업이 `- [YYYY-Www](../weekly/YYYY-Www/) — 한 줄 요약`을 맨 위에 추가
+수집 작업이 새 항목을 추가하면 `last_run`을 이번 실행 시각(`YYYY-MM-DD HH:MM CT`)으로 바꾸고 `runs` 맨 앞에 `{at, task, added}`를 추가한다. 새 항목이 0건이면 바꾸지 않는다. 기초 문헌 작업은 `runs`에만 기록하고 `last_run`은 건드리지 않는다. `runs`는 최근 60개만 남긴다.
 
-## weekly 문서 형식
+## 주간 리포트 형식
 
 ```
 ---
@@ -83,49 +83,49 @@ title: "AI 보안 주간 심층 리포트 — YYYY-Www"
 date: <date 명령 출력>
 slug: "YYYY-Www"
 description: "<이번 주 핵심 흐름을 한 문장으로>"
-categories: [다룬 카테고리들]
-tags: [...]
 ---
 
-## 이번 주 한눈에 보기
-(5줄 이내)
-
-## 핵심 흐름 1: ...
-(동작 원리, 이번 주 근거, 추가 근거·반론·후속)
-
+## 이번 주 한눈에 보기          (5줄 이내)
+## 핵심 흐름 1: ...             (동작 원리, 이번 주 근거 항목 ID, 추가 근거·반론·후속)
 ...
-
-## 이번 주 점검 항목
-(Kubernetes / CI·CD / 에이전트 플랫폼 운영 팀 기준, 구체 행동)
-
+## 이번 주 점검 항목             (Kubernetes / CI·CD / 에이전트 플랫폼 팀 기준, 구체 행동)
+## 책 관점                       (어느 장의 근거가 늘었나, 매트릭스에서 새로 채워진 칸·여전히 빈 칸, 목차 구조 변경 제안 — 제안만, outline.md는 고치지 않는다)
 ## 다음 주 지켜볼 것
-
 ## Sources
 ```
 
-## 수집 규칙
+본문에서 항목을 언급할 때는 ID를 함께 적는다(예: "에이전트 권한 경계 이탈(AISEC-2026-0017)").
 
-- 대상 기간: catalog.md의 "마지막 실행" 이후 발행된 자료
-- 중복 제거: catalog.md에 같은 URL이 있거나 같은 사건(같은 CVE/같은 제품의 같은 취약점)이 있으면 제외. 패치·CVE 부여·실제 악용 확인 같은 중요한 후속은 제목에 "후속:"을 붙여 새 항목으로
-- 1차 출처 우선: 벤더 보안 권고, GHSA/CVE, arXiv, 연구 기관 블로그 > 전문 보안 매체 > 집계 블로그
-- 모든 사실·수치·링크는 실제로 읽은 페이지에서 나온 것만 쓴다. 확인이 안 되면 제목에 "(원문 미확인)"을 붙이거나 버린다
-- 웹 접근: WebFetch가 거절(429 요청 제한, 차단, 법적 사유)하면 그 페이지를 재시도하거나 curl·스크립트·캐시·미러·아카이브·브라우저 위장 등으로 우회하지 않는다. 다른 공개 출처로 교차 확인한다
-- 저작권: 원문 문장을 옮기지 않고 요약한다. 인용은 출처당 1회, 15단어 미만
-- 실행당 최대 12개. 새 자료가 없으면 아무 파일도 바꾸지 않고 커밋하지 않는다
+## 기초 문헌 트랙
+
+- `track: foundation`, `item_type: 기초 문헌`. 발행일 제한이 없다 (오래된 고전 논문·표준도 대상).
+- 대상: 동료 심사 논문·arXiv 원 논문, 표준·프레임워크 문서(OWASP, NIST AI RMF·AI 100-2, MITRE ATLAS, CSA 등), 정부·주요 기관 보고서. 1등급 원문만. 블로그 요약은 대상이 아니다.
+- 고르는 기준: `python3 scripts/kb.py coverage` 의 빈 칸·1건뿐인 칸, 그리고 `content/book/outline.md`에서 "근거 부족"이 뜨는 장. 실행당 3~5건.
+- 논문은 identifiers.arxiv/doi와 저자 전원, locator는 절·표·그림 번호로.
+
+## 수집 공통 규칙
+
+- 대상 기간(뉴스 트랙): `data/state.yaml`의 `last_run` 이후 발행된 자료.
+- 1차 출처 우선: 벤더 보안 권고, GHSA/CVE, arXiv, 연구 기관 블로그, 공식 발표 > 전문 보안 매체 > 집계 블로그.
+- 모든 사실·수치·링크는 실제로 읽은 페이지에서 나온 것만 쓴다.
+- **웹 접근**: WebFetch가 거절(429 요청 제한, 차단, 법적 사유)하면 그 페이지를 재시도하거나 curl·스크립트·캐시·미러·아카이브·브라우저 위장 등으로 우회하지 않는다. 다른 공개 출처로 교차 확인하고, 안 되면 `status`를 낮추고 `followup`에 적는다. (arXiv는 `arxiv.org/abs/<id>`가 막혀도 `arxiv.org/html/<id>v1` 본문이 열리는 경우가 있다 — 같은 사이트의 정식 페이지라 우회가 아니다. 거기서도 거절되면 멈춘다.)
+- 저작권: 원문 문장을 옮기지 않고 요약한다.
+- 실행당 최대 12개(뉴스), 3~5개(기초 문헌). 새 자료가 없으면 아무 파일도 바꾸지 않고 커밋하지 않는다.
 
 ## 검증과 커밋
 
-1. `./scripts/check.sh` 실행 — front matter 날짜가 미래가 아닌지, catalog URL 중복이 없는지, `hugo` 빌드가 되는지(hugo가 없으면 빌드 단계는 건너뜀) 확인. **OK가 나와야 커밋한다.** 실패하면 콘텐츠를 고쳐 다시 실행한다. 스크립트를 고쳐서 통과시키지 않는다.
-2. 바꾼 콘텐츠 파일만 `git add` 한다 (`content/` 아래).
-3. 커밋 메시지: 수집은 `digest: YYYY-MM-DD HH:MM CT — N건 추가`, 주간은 `weekly: YYYY-Www`. 미확인 항목 보완만 있으면 `digest: 원문 확인 보완 (...)`.
-4. `main`에 푸시. GitHub Actions가 사이트를 배포한다.
+1. `./scripts/check.sh` — `kb.py validate`(스키마·두 축 어휘·출처 메타데이터·1차 출처 조건·URL 중복·다이제스트 참조·미래 날짜) + Hugo 빌드. **마지막 줄이 OK여야 커밋한다.** 실패하면 콘텐츠를 고친다. 스크립트·설정을 고쳐서 통과시키지 않는다.
+2. 바꾼 파일만 `git add` (`content/items/`, `content/digest/`, `content/weekly/`, `data/state.yaml`).
+3. 커밋 메시지: 수집 `digest: YYYY-MM-DD HH:MM CT — N건 추가`, 기초 문헌 `foundation: YYYY-MM-DD — N건 추가`, 주간 `weekly: YYYY-Www`, 보완만 있으면 `items: 원문 확인 보완 (ID, ...)`.
+4. `main`에 푸시 (거절되면 `git pull --rebase` 후 check.sh 재실행·재푸시). GitHub Actions가 배포하면서 참고문헌 BibTeX·CSL-JSON도 새로 만든다.
 
 ## claude.ai 프로젝트 사본
 
-푸시 후 Projects 도구의 `project_write`로 같은 내용을 올린다(`local_path` 사용):
-- `content/digest/YYYY-MM-DD.md` → `ai-security/digest/YYYY-MM-DD.md`
-- `content/weekly/YYYY-Www.md` → `ai-security/weekly/YYYY-Www.md`
-- `content/catalog.md` → `ai-security/index.md`
-- 이 파일 `CLAUDE.md`는 바뀌었을 때만 → `ai-security/README.md`
+푸시 후 Projects 도구 `project_write`(`local_path` 사용)로 올린다. 사본 파일은 레포 밖(`$HOME/kb-export/`)에 만든다.
+
+- `python3 scripts/kb.py export-day YYYY-MM-DD > $HOME/kb-export/digest-YYYY-MM-DD.md` → `ai-security/digest/YYYY-MM-DD.md` (그날 다이제스트 + 항목 전문 + 주장·출처)
+- `python3 scripts/kb.py export-index > $HOME/kb-export/index.md` → `ai-security/index.md`
+- 주간 리포트 `content/weekly/YYYY-Www.md` → `ai-security/weekly/YYYY-Www.md`
+- 이 파일이 바뀌었을 때만 `CLAUDE.md` → `ai-security/README.md`
 
 Projects 도구를 쓸 수 없으면 레포 커밋은 그대로 두고 보고에 "프로젝트 사본 갱신 실패"를 적는다. 레포가 원본이다.

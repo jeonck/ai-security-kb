@@ -1,0 +1,6 @@
+{{- /* 항목의 생명주기·통제 칩. 입력: 항목 페이지 */ -}}
+{{- $p := . -}}
+<div class="chips axis-chips">
+  {{- range $p.GetTerms "lifecycle" }}<a class="chip chip-lc" href="{{ .RelPermalink }}" title="생명주기">{{ .LinkTitle }}</a>{{ end -}}
+  {{- range $p.GetTerms "controls" }}<a class="chip chip-ctl" href="{{ .RelPermalink }}" title="통제 계층">{{ .LinkTitle }}</a>{{ end -}}
+</div>
