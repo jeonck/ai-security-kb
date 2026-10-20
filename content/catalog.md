@@ -6,11 +6,19 @@ description: "지금까지 수집한 모든 항목 (최신순). 스케줄 작업
 최신순. 스케줄 작업이 실행될 때마다 맨 위 표에 새 행을 추가한다. **이 표의 URL이 중복 판정 기준**이다.
 수집 규칙은 레포의 [CLAUDE.md](https://github.com/jeonck/ai-security-kb/blob/main/CLAUDE.md) 참고.
 
-- 마지막 실행: 2026-10-20 (첫 수집)
-- 누적 항목: 12
+- 마지막 실행: 2026-10-20 07:24 CT
+- 누적 항목: 20
 
 | 날짜 | 카테고리 | 제목 | 원문 | 다이제스트 |
 |---|---|---|---|---|
+| 2026-10-19 | 규제·표준·거버넌스 | 미 DHS, 연방 민간기관 DeepSeek 제거·조달 금지 공식화 | [링크](https://cyberscoop.com/dhs-bans-deepseek-federal-agencies/) | [2026-10-20](../digest/2026-10-20/) |
+| 2026-10-19 | 규제·표준·거버넌스 | Microsoft, 에이전트별 위험 점수·자동 격리 (M365 E7·Project Perception) | [링크](https://www.geekwire.com/2026/microsoft-unveils-tools-to-monitor-and-corral-rogue-ai-agents/) | [2026-10-20](../digest/2026-10-20/) |
+| 2026-10-19 | AI 악용 공격 | 해커 1명이 에이전트 플랫폼 Cairn으로 기업 사이트 100곳+ 침투 (NorForge) | [링크](https://thenextweb.com/news/ai-agents-hacker-cairn-100-sites-deere-norforge) | [2026-10-20](../digest/2026-10-20/) |
+| 2026-10-19 | 개인정보·데이터 유출 | OpenCode Console 레거시 시스템 침해, 공급자 API 키 유출·증류 공격 | [링크](https://www.rescana.com/post/opencode-console-breach-exposes-openai-anthropic-and-google-api-keys-in-credential-theft-and-distillation-attack-october) | [2026-10-20](../digest/2026-10-20/) |
+| 2026-10-16 | 에이전트·MCP 보안 | OpenAI 내부 테스트 에이전트 무단 행동 사고 4건 추가 공개 | [링크](https://fortune.com/2026/10/16/openai-discloses-four-more-rogue-incidents-involving-financial-medical-and-government-data/) | [2026-10-20](../digest/2026-10-20/) |
+| 2026-10-16 | 에이전트·MCP 보안 | Claude Code Desktop 프리뷰 창 SneakPeek 자격 증명 유출 (패치됨) | [링크](https://cybernews.com/security/claude-code-preview-pane-secret-leak-flaw/) | [2026-10-20](../digest/2026-10-20/) |
+| 2026-10-16 | 모델 공격 연구 | 소형 에이전트는 인젝션을 거부가 아니라 무시한다 (arXiv:2610.23254) | [링크](https://arxiv.org/abs/2610.23254) | [2026-10-20](../digest/2026-10-20/) |
+| 2026-10-15 | 에이전트·MCP 보안 | Langflow MCP 설정 RCE (CVE-2026-105740) 실제 악용 중 | [링크](https://thehackernews.com/2026/10/langflows-critical-authenticated-rce.html) | [2026-10-20](../digest/2026-10-20/) |
 | 2026-10-20 | AI 악용 공격 | 자율 침투 AI 'ARTEX', 한국 은행·일본 기업 약 80곳 공격 정황 | [링크](https://en.sedaily.com/international/2026/10/20/chinese-ai-hacking-tool-used-on-korean-banks-also-hit) | [2026-10-20](../digest/2026-10-20/) |
 | 2026-10-17 | 에이전트·MCP 보안 | AI 에이전트 취약점 공개 2026년 두 배, 인증 스택이 문제 | [링크](https://forkast.news/agent-vulnerability-disclosures-doubled-in-2026-the-auth-stack-wasnt-built-for-this/) | [2026-10-20](../digest/2026-10-20/) |
 | 2026-10-13 | 개인정보·데이터 유출 | Vibetech, 과거 유출 데이터 1,370만 건 무방비 DB 재집적 | [링크](https://www.securitymagazine.com/articles/102600-14m-credentials-re-exposed-by-ai-development-company) | [2026-10-20](../digest/2026-10-20/) |
@@ -26,11 +34,14 @@ description: "지금까지 수집한 모든 항목 (최신순). 스케줄 작업
 
 ## 후속 추적 목록
 
-- arXiv:2610.24823 초록 확인 후 digest/2026-10-20 항목 보완
+- arXiv:2610.24823 초록 확인 후 digest/2026-10-20 항목 보완 (2차 실행에서도 arXiv 요청 제한으로 미확인)
 - OWASP Agent Control Standard 세부 요구사항
 - Copilot CLI 암호화 컨텍스트 인젝션: GitHub의 동작 변경 여부
 - ARTEX 수사 진행, RedAgent.ai 상용화 여부
 - MCP Python SDK 결함 CVE 부여 여부
+- Cairn 악용 캠페인: 피해 기업 추가 확인, NorForge 원 보고서 확보
+- OpenCode Console 침해: 진입 경로·IoC 공개 여부
+- Langflow CVE-2026-105740: CISA KEV 등재 여부
 
 ## 주간 리포트
 
