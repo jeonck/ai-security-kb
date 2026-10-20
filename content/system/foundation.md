@@ -48,7 +48,7 @@ Agent 도구(subagent_type="general-purpose", run_in_background=false)로 고른
 ## 3. 기록·검증·커밋 (추가할 항목이 있을 때만)
 - 후보마다 `python3 scripts/kb.py find <URL 또는 arXiv/DOI>` 로 중복을 확인하고, status가 confirmed가 아닌 후보는 버린다. 전체 3~5건.
 - `python3 scripts/kb.py next-id` 부터 순서대로 ID를 매겨 `content/items/<ID>.md` 로 저장. book_note에 outline.md의 장 번호·제목을 적는다.
-- 오늘 다이제스트(`content/digest/<오늘>.md`)를 만들거나 맨 끝에 `## 기초 문헌 (HH:MM CT)` 절(왜 이 칸을 채웠는지 2줄 + `{{< items ... >}}`)을 붙이고 front matter `items`·`description`을 갱신한다. `data/state.yaml` 의 runs 맨 앞에 `{at, task: "기초 문헌", added}` 를 추가한다(last_run은 건드리지 않는다).
+- 오늘 다이제스트(`content/digest/<오늘>.md`)를 만들거나 맨 끝에 `## 기초 문헌 (HH:MM CT)` 절(왜 이 칸을 채웠는지 2줄 + `{{</* items ... */>}}`)을 붙이고 front matter `items`·`description`을 갱신한다. `data/state.yaml` 의 runs 맨 앞에 `{at, task: "기초 문헌", added}` 를 추가한다(last_run은 건드리지 않는다).
 - `./scripts/check.sh` (hugo가 없으면 `pip install hugo --break-system-packages -q`) → OK일 때만 바꾼 파일을 add → 커밋 `foundation: <YYYY-MM-DD> — N건 추가` → `main` 푸시(거절되면 `git pull --rebase` 후 재검증·재푸시).
 - 프로젝트 사본: CLAUDE.md 절차대로 export-day·export-index 를 `project_write`(local_path).
 
