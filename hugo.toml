@@ -1,0 +1,51 @@
+baseURL = "https://jeonck.github.io/ai-security-kb/"
+locale = "ko-KR"
+defaultContentLanguage = "ko"
+title = "AI Security KB"
+# 날짜가 미래로 찍힌 글이 조용히 빌드에서 빠지는 일을 막는다 (샌드박스 UTC 시계 대비)
+buildFuture = true
+enableRobotsTXT = true
+enableGitInfo = true
+summaryLength = 40
+
+[params]
+  description = "AI 보안(프롬프트 인젝션, 에이전트·MCP, 모델 공격, AI 공급망, 개인정보, 규제) 뉴스와 연구를 6시간마다 수집·요약하는 지식 베이스"
+  author = "CK"
+  repo = "https://github.com/jeonck/ai-security-kb"
+
+[taxonomies]
+  tag = "tags"
+  category = "categories"
+
+[permalinks]
+  digest = "/digest/:slug/"
+  weekly = "/weekly/:slug/"
+
+[markup.goldmark.renderer]
+  unsafe = false
+
+[markup.tableOfContents]
+  startLevel = 2
+  endLevel = 3
+
+[outputs]
+  home = ["HTML", "RSS"]
+  section = ["HTML", "RSS"]
+
+[menus]
+  [[menus.main]]
+    name = "다이제스트"
+    pageRef = "/digest"
+    weight = 10
+  [[menus.main]]
+    name = "주간 리포트"
+    pageRef = "/weekly"
+    weight = 20
+  [[menus.main]]
+    name = "전체 목록"
+    pageRef = "/catalog"
+    weight = 30
+  [[menus.main]]
+    name = "카테고리"
+    pageRef = "/categories"
+    weight = 40

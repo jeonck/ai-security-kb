@@ -1,0 +1,21 @@
+{{ define "main" }}
+<header class="page-head">
+  <h1>{{ .Title }}</h1>
+  {{ with .Content }}<div class="prose">{{ . }}</div>{{ end }}
+</header>
+{{ if eq .Kind "taxonomy" }}
+<div class="chips">
+  {{ range .Data.Terms.ByCount }}
+  <a class="chip" href="{{ .Page.RelPermalink }}">{{ .Page.Title }} <b>{{ .Count }}</b></a>
+  {{ end }}
+</div>
+{{ else }}
+{{ range .Pages.ByDate.Reverse }}
+<a class="card" href="{{ .RelPermalink }}">
+  <span class="card-date">{{ .Date.Format "2006-01-02" }}{{ with .Params.items }} · {{ . }}건{{ end }}</span>
+  <span class="card-title">{{ .Title }}</span>
+  {{ with .Description }}<span class="card-summary">{{ . }}</span>{{ end }}
+</a>
+{{ end }}
+{{ end }}
+{{ end }}

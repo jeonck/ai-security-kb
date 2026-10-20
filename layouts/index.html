@@ -1,0 +1,43 @@
+{{ define "main" }}
+<section class="hero">
+  <p class="eyebrow">AI SECURITY KNOWLEDGE BASE</p>
+  <h1>AI 보안, 6시간마다 정리합니다</h1>
+  <p class="lede">{{ site.Params.description }}</p>
+  {{ .Content }}
+</section>
+
+{{ $weekly := where site.RegularPages "Section" "weekly" }}
+{{ with index $weekly.ByDate.Reverse 0 }}
+<section class="block">
+  <h2 class="block-title">최신 주간 리포트</h2>
+  <a class="card card-feature" href="{{ .RelPermalink }}">
+    <span class="card-date">{{ .Date.Format "2006-01-02" }}</span>
+    <span class="card-title">{{ .Title }}</span>
+    <span class="card-summary">{{ .Summary | plainify | truncate 180 }}</span>
+  </a>
+</section>
+{{ end }}
+
+<section class="block">
+  <h2 class="block-title">최근 다이제스트</h2>
+  {{ $digests := where site.RegularPages "Section" "digest" }}
+  {{ range first 10 $digests.ByDate.Reverse }}
+  <a class="card" href="{{ .RelPermalink }}">
+    <span class="card-date">{{ .Date.Format "2006-01-02" }}{{ with .Params.items }} · {{ . }}건{{ end }}</span>
+    <span class="card-title">{{ .Title }}</span>
+    {{ with .Description }}<span class="card-summary">{{ . }}</span>{{ end }}
+  </a>
+  {{ else }}
+  <p class="muted">아직 다이제스트가 없습니다.</p>
+  {{ end }}
+</section>
+
+<section class="block">
+  <h2 class="block-title">카테고리</h2>
+  <div class="chips">
+    {{ range site.Taxonomies.categories.ByCount }}
+    <a class="chip" href="{{ .Page.RelPermalink }}">{{ .Page.Title }} <b>{{ .Count }}</b></a>
+    {{ end }}
+  </div>
+</section>
+{{ end }}
