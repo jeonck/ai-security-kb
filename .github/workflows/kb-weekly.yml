@@ -1,0 +1,36 @@
+# AI 보안 주간 심층 리포트 — 매주 월 (claude.ai 스케줄 작업 'AI 보안 주간 심층 리포트'를 옮긴 것)
+# GitHub cron은 UTC 고정이다. 12:44 UTC = 07:44 CDT(서머타임) / 06:44 CST(11월 첫 일요일 이후).
+# 이번 주 리포트(content/weekly/<ISO 주차>.md)가 이미 있으면 건너뛴다. 수동 실행 때 force로 강제할 수 있다.
+name: KB weekly
+
+on:
+  schedule:
+    - cron: "44 12 * * 1"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "이번 주 리포트가 이미 있어도 실행 (<주차>-2.md로 저장)"
+        type: boolean
+        default: false
+      max_turns:
+        description: "최대 턴 수"
+        required: false
+        default: "300"
+
+concurrency:
+  group: kb-content
+  cancel-in-progress: false
+
+jobs:
+  weekly:
+    if: github.event_name == 'workflow_dispatch' || vars.KB_AUTOMATION_ENABLED == 'true'
+    permissions:
+      contents: write
+      actions: write
+      issues: write
+    uses: ./.github/workflows/kb-agent.yml
+    with:
+      task: weekly
+      max_turns: ${{ fromJSON(inputs.max_turns || '300') }}
+      force: ${{ inputs.force == true }}
+    secrets: inherit

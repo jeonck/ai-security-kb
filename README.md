@@ -10,6 +10,7 @@ AI 보안(프롬프트 인젝션, 에이전트·MCP 보안, 모델 공격 연구
 - 딥 리서치가 어디에 쓰이는지: [시스템 › 딥 리서치는 어디에 쓰이나](https://jeonck.github.io/ai-security-kb/system/deep-research/)
 - 전체 목록: [`content/catalog.md`](content/catalog.md)
 - 작업 규칙과 형식: [`CLAUDE.md`](CLAUDE.md)
+- GitHub Actions로 돌리기(준비됨, 기본 꺼짐): [`automation/README.md`](automation/README.md)
 
 모든 추가·수정은 커밋으로 남으므로, 어떤 항목이 언제 들어왔는지 `git log -- content/` 로 추적할 수 있습니다.
 요약은 원문을 대체하지 않습니다. 각 항목의 출처 링크에서 원문을 확인하세요.

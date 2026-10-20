@@ -10,6 +10,8 @@
 | AI 보안 기초 문헌 수집 | 매주 화·금 | 집필 매트릭스의 빈 칸·얇은 칸을 채울 기초 문헌(논문·표준·주요 보고서)을 항목으로 추가 |
 | AI 보안 주간 심층 리포트 | 매주 월 07:44 CT | 지난 7일 항목을 출발점으로 심층 리서치 → `content/weekly/` (책 관점 절 포함) |
 
+**실행 환경은 두 가지다.** (1) claude.ai 스케줄 작업: 에이전트가 레포를 연결해 직접 커밋·푸시하고 프로젝트 사본을 올린다. (2) GitHub Actions(`.github/workflows/kb-*.yml`, 설명은 `automation/README.md`): 레포가 체크아웃된 상태에서 `automation/prompts/<작업>.md`로 실행된다. 이때는 프롬프트 앞에 붙는 `automation/prompts/_ci.md`가 이 문서보다 우선한다. 에이전트는 파일만 고치고, 경로 검사·check.sh·커밋·푸시·배포는 워크플로가 한다. 프로젝트 사본은 건너뛴다.
+
 ## 파일 구조
 
 | 경로 | 역할 | 누가 바꾸나 |
@@ -23,6 +25,7 @@
 | `content/system/` | 시스템 설명·프롬프트·구축 기록 | **저자만** |
 | `content/catalog.md`, `content/references.md`, `content/lifecycle/`, `content/controls/` | 자동 생성 페이지의 틀 | **저자만** |
 | `layouts/`, `static/`, `hugo.toml`, `.github/`, `scripts/`, `docs/` | 사이트 틀·도구·형식 문서 | **저자만** |
+| `automation/`, `.claude/skills/` | GitHub Actions용 프롬프트·도구 권한 설정, 주간 리포트가 쓰는 딥 리서치 스킬 | **저자만** |
 
 스케줄 작업이 바꿔도 되는 것은 `content/items/`, `content/digest/`, `content/weekly/`, `data/state.yaml` 뿐이다.
 

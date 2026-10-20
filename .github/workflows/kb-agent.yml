@@ -1,0 +1,206 @@
+# 지식 베이스 작업 하나(수집·기초 문헌·주간 리포트)를 Claude Code 헤드리스 모드로 돌리는 공통 워크플로.
+# kb-collect.yml / kb-foundation.yml / kb-weekly.yml 이 이 파일을 부른다. 설명: automation/README.md
+#
+# 에이전트는 파일만 고친다. 경로 검사·check.sh·커밋·푸시·배포·알림은 이 워크플로가 한다.
+name: KB agent (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      task:
+        description: "collect | foundation | weekly"
+        required: true
+        type: string
+      max_turns:
+        required: false
+        type: number
+        default: 200
+      force:
+        description: "weekly: 이번 주 리포트가 이미 있어도 실행"
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: write   # 커밋·푸시
+      actions: write    # 배포 워크플로 실행 (GITHUB_TOKEN 푸시는 push 이벤트를 만들지 않음)
+      issues: write     # 알림 이슈 (KB_NOTIFY_ISSUE=true 일 때만)
+    env:
+      TASK: ${{ inputs.task }}
+      KB_MODEL: ${{ vars.KB_MODEL || 'claude-opus-5-5' }}
+      CLAUDE_CODE_VERSION: ${{ vars.CLAUDE_CODE_VERSION || 'latest' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: "0.168.0"
+          extended: true
+
+      - name: Install PyYAML
+        run: python3 -c "import yaml" || pip install --break-system-packages pyyaml || pip install pyyaml
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Claude Code
+        run: |
+          npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
+          claude --version
+
+      - name: Run time (US Central)
+        id: when
+        run: |
+          {
+            echo "KB_RUN_AT=$(TZ=America/Chicago date '+%F %H:%M')"
+            echo "KB_DATE=$(TZ=America/Chicago date +%F)"
+            echo "KB_WEEK=$(TZ=America/Chicago date +%G-W%V)"
+            echo "KB_TIMESTAMP=$(TZ=America/Chicago date +%Y-%m-%dT%H:%M:%S%:z)"
+            echo "KB_WORK_DIR=$RUNNER_TEMP/kb-work"
+            echo "KB_REPORT_FILE=$RUNNER_TEMP/kb-report.md"
+          } >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/kb-work"
+
+      - name: Skip if this week's report exists (weekly)
+        id: skip
+        run: |
+          if [ "$TASK" = "weekly" ] && [ -f "content/weekly/${KB_WEEK}.md" ] && [ "${{ inputs.force }}" != "true" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "content/weekly/${KB_WEEK}.md 이(가) 이미 있어 건너뜀 (force 입력으로 강제 실행 가능)" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Build prompt
+        if: steps.skip.outputs.skip != 'true'
+        run: |
+          python3 - <<'PY'
+          import os, pathlib
+          task = os.environ["TASK"]
+          text = pathlib.Path("automation/prompts/_ci.md").read_text(encoding="utf-8") \
+               + pathlib.Path(f"automation/prompts/{task}.md").read_text(encoding="utf-8")
+          values = {k: os.environ[k] for k in
+                    ["KB_RUN_AT", "KB_DATE", "KB_WEEK", "KB_TIMESTAMP", "KB_WORK_DIR", "KB_REPORT_FILE"]}
+          values["KB_SUBAGENT_TOOL"] = "Agent"
+          for k, v in values.items():
+              text = text.replace(f"@@{k}@@", v)
+          assert "@@KB_" not in text, "치환되지 않은 자리표시자가 남았다"
+          pathlib.Path(os.environ["RUNNER_TEMP"], "prompt.md").write_text(text, encoding="utf-8")
+          PY
+
+      - name: Run Claude Code
+        if: steps.skip.outputs.skip != 'true'
+        env:
+          OAUTH: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          APIKEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS: "0"
+          CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION: "400"
+        run: |
+          # 인증은 하나만 넘긴다 (둘 다 있으면 API 키가 이긴다). OAuth 토큰을 우선한다.
+          if [ -n "$OAUTH" ]; then export CLAUDE_CODE_OAUTH_TOKEN="$OAUTH";
+          elif [ -n "$APIKEY" ]; then export ANTHROPIC_API_KEY="$APIKEY";
+          else echo "::error::CLAUDE_CODE_OAUTH_TOKEN 또는 ANTHROPIC_API_KEY 시크릿이 없다"; exit 1; fi
+          unset OAUTH APIKEY
+          set -o pipefail
+          claude -p "$(cat "$RUNNER_TEMP/prompt.md")" \
+            --model "$KB_MODEL" \
+            --max-turns "${{ inputs.max_turns }}" \
+            --permission-mode dontAsk \
+            --settings automation/claude-settings.json \
+            --output-format stream-json --verbose \
+            > "$RUNNER_TEMP/transcript.jsonl"
+
+      - name: Check changed paths
+        if: steps.skip.outputs.skip != 'true'
+        id: paths
+        run: |
+          allowed='^(content/items/AISEC-[0-9]{4}-[0-9]{4}\.md|content/digest/[0-9]{4}-[0-9]{2}-[0-9]{2}\.md|content/weekly/[0-9]{4}-W[0-9]{2}(-[A-Za-z0-9-]+)?\.md|data/state\.yaml)$'
+          bad=0; n=0
+          while IFS= read -r line; do
+            [ -z "$line" ] && continue
+            st="${line:0:2}"; path="${line:3}"
+            n=$((n+1))
+            if [[ "$st" == *D* ]] || ! [[ "$path" =~ $allowed ]]; then
+              echo "::error::허용되지 않은 변경: [$st] $path"; bad=1
+            fi
+          done < <(git status --porcelain=v1 -uall)
+          if [ "$bad" -ne 0 ]; then
+            echo "허용 경로 밖이 바뀌어 커밋하지 않았다." >> "$GITHUB_STEP_SUMMARY"; exit 1
+          fi
+          echo "changed=$n" >> "$GITHUB_OUTPUT"
+
+      - name: Validate (check.sh)
+        if: steps.skip.outputs.skip != 'true' && steps.paths.outputs.changed != '0'
+        run: |
+          set -o pipefail
+          ./scripts/check.sh 2>&1 | tail -20
+
+      - name: Commit and push
+        if: steps.skip.outputs.skip != 'true' && steps.paths.outputs.changed != '0'
+        run: |
+          new_ids=$(git status --porcelain=v1 -uall content/items | awk '$1=="??"{print $2}' | sed -E 's#.*/(AISEC-[0-9-]+)\.md#\1#' | tr '\n' ' ')
+          mod_ids=$(git status --porcelain=v1 content/items | awk '$1=="M"{print $2}' | sed -E 's#.*/(AISEC-[0-9-]+)\.md#\1#' | paste -sd, -)
+          n_new=$(echo $new_ids | wc -w)
+          case "$TASK" in
+            collect)
+              if [ "$n_new" -gt 0 ]; then msg="digest: ${KB_RUN_AT} CT — ${n_new}건 추가"; else msg="items: 원문 확인 보완 (${mod_ids})"; fi ;;
+            foundation)
+              if [ "$n_new" -gt 0 ]; then msg="foundation: ${KB_DATE} — ${n_new}건 추가"; else msg="items: 원문 확인 보완 (${mod_ids})"; fi ;;
+            weekly) msg="weekly: ${KB_WEEK}" ;;
+          esac
+          body="Automated by ${GITHUB_WORKFLOW} (task: ${TASK}) — ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          [ -n "$mod_ids" ] && body="${body}"$'\n'"보완한 항목: ${mod_ids}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content/items content/digest content/weekly data/state.yaml
+          git commit -q -m "$msg" -m "$body"
+          for i in 1 2 3; do
+            if git push origin HEAD:main; then break; fi
+            git pull --rebase origin main
+            ./scripts/check.sh | tail -1
+            [ "$i" = 3 ] && { echo "::error::푸시 3회 실패"; exit 1; }
+          done
+          echo "커밋: \`$(git rev-parse --short HEAD)\` $msg" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Deploy site
+        if: steps.skip.outputs.skip != 'true' && steps.paths.outputs.changed != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref main
+
+      - name: Report
+        if: always() && steps.skip.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NOTIFY: ${{ vars.KB_NOTIFY_ISSUE }}
+        run: |
+          {
+            echo "## ${TASK} — ${KB_RUN_AT} CT"
+            if [ -f "$KB_REPORT_FILE" ]; then cat "$KB_REPORT_FILE"; else echo "(보고 파일 없음 — transcript 아티팩트 확인)"; fi
+            if [ "$TASK" = "weekly" ] && [ -f "$RUNNER_TEMP/transcript.jsonl" ]; then
+              if grep -q '"name":"Skill"' "$RUNNER_TEMP/transcript.jsonl"; then echo; echo "> Skill 도구 호출 기록 있음"; else echo; echo "> Skill 도구 호출 기록 없음 (SKILL.md를 직접 읽었을 수 있음)"; fi
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$NOTIFY" = "true" ] && [ -f "$KB_REPORT_FILE" ]; then
+            title=$(head -1 "$KB_REPORT_FILE" | cut -c1-200)
+            gh label create kb-report --color 0e8a16 --description "지식 베이스 자동 실행 보고" 2>/dev/null || true
+            { cat "$KB_REPORT_FILE"; echo; echo "---"; echo "실행 기록: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"; } > "$RUNNER_TEMP/issue.md"
+            gh issue create --title "$title" --body-file "$RUNNER_TEMP/issue.md" --label kb-report
+          fi
+
+      - name: Upload transcript and notes
+        if: always() && steps.skip.outputs.skip != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: kb-${{ inputs.task }}-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/transcript.jsonl
+            ${{ runner.temp }}/kb-report.md
+            ${{ runner.temp }}/kb-work/
+          retention-days: 7
+          if-no-files-found: ignore

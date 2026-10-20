@@ -24,6 +24,7 @@ description: "AI 보안 리서치 조교의 구조, 실행 흐름, 실제로 쓰
 | `CLAUDE.md` | 세 작업이 매번 먼저 읽는 규칙의 원본 | [레포](https://github.com/jeonck/ai-security-kb/blob/main/CLAUDE.md) |
 | `scripts/kb.py` | 검증(스키마·축 어휘·1차 출처 조건·URL 중복), 중복 찾기, 매트릭스 집계, 프로젝트 사본·참고문헌 내보내기 | [레포](https://github.com/jeonck/ai-security-kb/blob/main/scripts/kb.py) |
 | GitHub Actions | 푸시마다 다시 검사 → 참고문헌(BibTeX·CSL-JSON) 생성 → 빌드 → Pages 배포 | [워크플로](https://github.com/jeonck/ai-security-kb/blob/main/.github/workflows/deploy.yml) |
+| GitHub Actions 크론 (준비됨, 꺼짐) | 세 작업을 Claude Code 헤드리스 모드로 돌리는 대체 실행 환경. 에이전트는 파일만 고치고 워크플로가 검증·커밋한다 | [GitHub Actions로 돌리기](automation/) |
 | claude.ai 프로젝트 "리서치" | 일자별 묶음(다이제스트+항목 전문)과 전체 목록의 사본. Claude 채팅에서 바로 검색·질문용 | — |
 
 ## 설계에서 지킨 원칙

@@ -1,0 +1,57 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Edit",
+      "Write",
+      "WebSearch",
+      "WebFetch",
+      "Skill",
+      "Bash(python3 scripts/kb.py *)",
+      "Bash(./scripts/check.sh)",
+      "Bash(TZ=America/Chicago date *)",
+      "Bash(date *)",
+      "Bash(ls *)",
+      "Bash(mkdir *)",
+      "Bash(wc *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)"
+    ],
+    "deny": [
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git config *)",
+      "Bash(git remote *)",
+      "Bash(curl *)",
+      "Bash(wget *)",
+      "Bash(env *)",
+      "Bash(printenv *)",
+      "Read(//proc/**)",
+      "Read(~/.ssh/**)",
+      "Read(~/.claude/**)",
+      "Read(~/.config/**)",
+      "Read(./.git/**)",
+      "Edit(./.github/**)",
+      "Edit(./.claude/**)",
+      "Edit(./automation/**)",
+      "Edit(./scripts/**)",
+      "Edit(./layouts/**)",
+      "Edit(./static/**)",
+      "Edit(./docs/**)",
+      "Edit(./content/book/**)",
+      "Edit(./content/system/**)",
+      "Edit(./data/axes.yaml)",
+      "Edit(./hugo.toml)",
+      "Edit(./CLAUDE.md)",
+      "Edit(./README.md)"
+    ]
+  },
+  "env": {
+    "DISABLE_AUTOUPDATER": "1"
+  }
+}

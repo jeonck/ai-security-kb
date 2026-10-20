@@ -1,0 +1,30 @@
+# AI 보안 리서치 조교 — 6시간마다 수집 (claude.ai 스케줄 작업 'AI 보안 리서치 조교'를 옮긴 것)
+# 저장소 변수 KB_AUTOMATION_ENABLED=true 일 때만 일정대로 돈다. 수동 실행(Run workflow)은 언제나 가능.
+name: KB collect
+
+on:
+  schedule:
+    - cron: "19 */6 * * *"   # UTC 00:19, 06:19, 12:19, 18:19
+  workflow_dispatch:
+    inputs:
+      max_turns:
+        description: "최대 턴 수"
+        required: false
+        default: "200"
+
+concurrency:
+  group: kb-content
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    if: github.event_name == 'workflow_dispatch' || vars.KB_AUTOMATION_ENABLED == 'true'
+    permissions:
+      contents: write
+      actions: write
+      issues: write
+    uses: ./.github/workflows/kb-agent.yml
+    with:
+      task: collect
+      max_turns: ${{ fromJSON(inputs.max_turns || '200') }}
+    secrets: inherit
