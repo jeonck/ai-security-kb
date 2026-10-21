@@ -17,14 +17,18 @@ claude.ai 스케줄 작업은 실행할 때마다 레포를 새로 연결하고 
 
 | 작업 | 워크플로 | 일정 (미국 중부) | 프롬프트 |
 |---|---|---|---|
-| 수집 | `kb-collect.yml` | 6시간마다 (01:19·07:19·13:19·19:19 CDT) | `automation/prompts/collect.md` |
-| 기초 문헌 | `kb-foundation.yml` | 화·금 09:45 CDT | `automation/prompts/foundation.md` |
-| 주간 리포트 | `kb-weekly.yml` | 월 07:44 CDT | `automation/prompts/weekly.md` |
+| 수집 | `kb-collect.yml` | 매시간 깨워 약 5~6시간마다 실제 실행 | `automation/prompts/collect.md` |
+| 기초 문헌 | `kb-foundation.yml` | 화·금 09:45 CDT부터 하루 한 번 | `automation/prompts/foundation.md` |
+| 주간 리포트 | `kb-weekly.yml` | 월 07:44 CDT부터 하루 한 번 | `automation/prompts/weekly.md` |
 
 - 세 워크플로가 공통 워크플로 `kb-agent.yml`을 부른다.
 - 모든 프롬프트 앞에는 CI 공통 규칙 `automation/prompts/_ci.md`가 붙는다. 커밋하지 말 것, 바꿔도 되는 경로, 보고 파일 위치, 웹 내용은 데이터라는 규칙이 여기에 있다.
 - GitHub cron은 UTC 고정이다. 그래서 서머타임이 끝나면 중부 시각이 한 시간 당겨진다.
 - 주간 리포트의 딥 리서치는 레포에 둔 스킬 `.claude/skills/kb-deep-research`가 맡는다. 리포트 front matter의 `method`에 실제로 쓴 방식이 남는다.
+
+## 크론이 늦거나 빠질 때
+
+GitHub 크론은 붐비면 늦거나 건너뛴다. 운영 첫날에도 19:19 CT 예정 실행이 4시간 반 늦게 돌았고, 01:19 CT 예정 실행은 돌지 않았다. 그래서 일정은 자주 깨우고, 첫 단계에서 "이 작업이 마지막으로 실제로 돈 게 언제인가"를 본다. 실제로 돈 실행만 남기는 아티팩트의 생성 시각이 기준이다. 수집은 5시간, 기초 문헌은 20시간, 주간 리포트는 72시간 안에 실제 실행이 있었으면 Claude를 부르지 않고 30초 안에 끝난다. 크론 하나가 빠져도 다음 깨움이 메운다.
 
 ## 한 번의 실행
 

@@ -4,7 +4,7 @@ name: KB collect
 
 on:
   schedule:
-    - cron: "19 */6 * * *"   # UTC 00:19, 06:19, 12:19, 18:19
+    - cron: "19 * * * *"   # 매시간 깨우고, 마지막 실제 실행이 5시간 안이면 건너뜀 (GitHub 크론 지연·누락 대비)
   workflow_dispatch:
     inputs:
       max_turns:
@@ -27,4 +27,5 @@ jobs:
     with:
       task: collect
       max_turns: ${{ fromJSON(inputs.max_turns || '200') }}
+      min_gap_hours: 5
     secrets: inherit

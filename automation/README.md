@@ -8,11 +8,19 @@ claude.ai 스케줄 작업으로 돌던 세 작업(수집 · 기초 문헌 · �
 
 | 작업 | 워크플로 | 일정 (cron은 UTC) | 미국 중부 시각 | 프롬프트 |
 |---|---|---|---|---|
-| 수집 (AI 보안 리서치 조교) | `.github/workflows/kb-collect.yml` | `19 */6 * * *` | 6시간마다 (01:19·07:19·13:19·19:19 CDT) | `automation/prompts/collect.md` |
-| 기초 문헌 수집 | `.github/workflows/kb-foundation.yml` | `45 14 * * 2,5` | 화·금 09:45 CDT / 08:45 CST | `automation/prompts/foundation.md` |
-| 주간 심층 리포트 | `.github/workflows/kb-weekly.yml` | `44 12 * * 1` | 월 07:44 CDT / 06:44 CST | `automation/prompts/weekly.md` |
+| 수집 (AI 보안 리서치 조교) | `.github/workflows/kb-collect.yml` | `19 * * * *` | 매시간 깨우고, 실제 실행은 약 5~6시간마다 | `automation/prompts/collect.md` |
+| 기초 문헌 수집 | `.github/workflows/kb-foundation.yml` | `45 14,15,16,17 * * 2,5` | 화·금 09:45 CDT부터, 하루 한 번만 실제 실행 | `automation/prompts/foundation.md` |
+| 주간 심층 리포트 | `.github/workflows/kb-weekly.yml` | `44 12,13,14,15,16 * * 1` | 월 07:44 CDT부터, 리포트가 생기면 그날 나머지는 건너뜀 | `automation/prompts/weekly.md` |
 
 세 워크플로 모두 공통 워크플로 `.github/workflows/kb-agent.yml`을 부른다. 모든 프롬프트 앞에는 `automation/prompts/_ci.md`(CI 공통 규칙)가 붙는다. GitHub cron은 UTC로 고정이라 11월 첫 일요일(서머타임 종료)부터는 중부 시각이 한 시간 당겨진다. 3월에 다시 원래 시각으로 돌아온다.
+
+### 크론이 늦거나 빠질 때
+
+GitHub은 크론 일정을 보장하지 않는다. 붐비면 몇 시간씩 늦추거나 건너뛴다. 운영 첫날에도 19:19 CT 예정 실행이 23:47에 돌았고, 01:19 CT 예정 실행은 아예 돌지 않았다. 그래서 일정은 자주 깨우고, 실행 첫 단계("Decide whether to run")에서 실제로 돌지 정한다.
+
+- 기준은 이 작업이 마지막으로 **실제로** 돈 시각이다. 실제로 돈 실행만 `kb-<작업>-<run id>` 아티팩트를 남기므로, 그 아티팩트의 생성 시각을 본다. 건너뛴 실행은 아티팩트를 남기지 않는다.
+- 수집은 마지막 실제 실행이 5시간 안이면 건너뛴다. 기초 문헌은 20시간, 주간 리포트는 72시간이 기준이다. 주간 리포트는 이번 주 파일이 이미 있어도 건너뛴다.
+- 건너뛰는 실행은 Claude를 부르지 않고 30초 안에 끝난다. 수동 실행은 이 검사를 하지 않는다.
 
 ## 한 번의 실행은 이렇게 흐른다
 
@@ -127,6 +135,7 @@ gh variable set KB_AUTOMATION_ENABLED --body true
 | `check.sh` 실패 | 콘텐츠 형식 오류. 커밋은 되지 않았다. 다음 실행이 다시 시도한다 |
 | 401·인증 오류 | 토큰 만료(1년) 또는 시크릿 오타. `claude setup-token`으로 다시 만든다 |
 | 일정 실행이 안 돈다 | `KB_AUTOMATION_ENABLED` 변수 확인. 공개 레포는 60일 동안 활동이 없으면 일정 실행이 꺼진다 |
+| 실행 목록에 몇 초짜리 성공이 많다 | 정상이다. 매시간 깨운 실행이 "최근에 이미 돌았다"며 건너뛴 것이다. 요약에 건너뛴 이유가 적힌다 |
 | 주간 리포트가 건너뛰어짐 | 이번 주 파일이 이미 있다. 수동 실행에서 `force`를 켠다 |
 
 ## 파일

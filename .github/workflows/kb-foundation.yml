@@ -1,10 +1,10 @@
 # AI 보안 기초 문헌 수집 — 매주 화·금 (claude.ai 스케줄 작업 'AI 보안 기초 문헌 수집'을 옮긴 것)
-# GitHub cron은 UTC 고정이다. 14:45 UTC = 09:45 CDT(서머타임) / 08:45 CST(11월 첫 일요일 이후).
+# GitHub cron은 UTC 고정이고 늦거나 건너뛸 수 있다. 14:45 UTC = 09:45 CDT / 08:45 CST. 실패 대비로 15·16·17시에도 깨운다.
 name: KB foundation
 
 on:
   schedule:
-    - cron: "45 14 * * 2,5"
+    - cron: "45 14,15,16,17 * * 2,5"   # 화·금 네 번 깨우고, 첫 실제 실행 뒤에는 건너뜀
   workflow_dispatch:
     inputs:
       max_turns:
@@ -27,4 +27,5 @@ jobs:
     with:
       task: foundation
       max_turns: ${{ fromJSON(inputs.max_turns || '150') }}
+      min_gap_hours: 20
     secrets: inherit

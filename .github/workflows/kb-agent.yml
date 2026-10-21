@@ -20,6 +20,11 @@ on:
         required: false
         type: boolean
         default: false
+      min_gap_hours:
+        description: "일정 실행일 때, 이 작업이 실제로 돈 지 이 시간이 안 지났으면 건너뛴다 (0이면 검사 안 함)"
+        required: false
+        type: number
+        default: 0
 
 jobs:
   run:
@@ -38,25 +43,59 @@ jobs:
         with:
           fetch-depth: 0
 
+      # GitHub 크론은 늦거나 건너뛸 수 있어서 일정은 자주 깨우고, 여기서 실제로 돌지 정한다.
+      # '실제로 돈 실행'은 이 워크플로가 남기는 kb-<task>-<run id> 아티팩트로 판단한다(건너뛴 실행은 남기지 않음).
+      - name: Decide whether to run
+        id: skip
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+          GAP: ${{ inputs.min_gap_hours }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          week=$(TZ=America/Chicago date +%G-W%V)
+          if [ "$TASK" = "weekly" ] && [ -f "content/weekly/${week}.md" ] && [ "$FORCE" != "true" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "content/weekly/${week}.md 이(가) 이미 있어 건너뜀 (수동 실행의 force로 강제 가능)" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if [ "$EVENT" = "schedule" ] && [ "${GAP:-0}" != "0" ]; then
+            last=$(gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100" \
+                     --jq "[.artifacts[] | select(.name | startswith(\"kb-${TASK}-\")) | .created_at] | max // empty")
+            if [ -n "$last" ]; then
+              age=$(( ( $(date -u +%s) - $(date -u -d "$last" +%s) ) / 3600 ))
+              if [ "$age" -lt "$GAP" ]; then
+                echo "skip=true" >> "$GITHUB_OUTPUT"
+                echo "마지막 실제 실행이 ${age}시간 전(${last})이라 건너뜀 (기준 ${GAP}시간)" >> "$GITHUB_STEP_SUMMARY"
+                exit 0
+              fi
+            fi
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+
       - uses: peaceiris/actions-hugo@v3
+        if: steps.skip.outputs.skip != 'true'
         with:
           hugo-version: "0.168.0"
           extended: true
 
       - name: Install PyYAML
+        if: steps.skip.outputs.skip != 'true'
         run: python3 -c "import yaml" || pip install --break-system-packages pyyaml || pip install pyyaml
 
       - uses: actions/setup-node@v4
+        if: steps.skip.outputs.skip != 'true'
         with:
           node-version: "22"
 
       - name: Install Claude Code
+        if: steps.skip.outputs.skip != 'true'
         run: |
           npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
           claude --version
 
       - name: Run time (US Central)
-        id: when
+        if: steps.skip.outputs.skip != 'true'
         run: |
           {
             echo "KB_RUN_AT=$(TZ=America/Chicago date '+%F %H:%M')"
@@ -67,14 +106,6 @@ jobs:
             echo "KB_REPORT_FILE=$RUNNER_TEMP/kb-report.md"
           } >> "$GITHUB_ENV"
           mkdir -p "$RUNNER_TEMP/kb-work"
-
-      - name: Skip if this week's report exists (weekly)
-        id: skip
-        run: |
-          if [ "$TASK" = "weekly" ] && [ -f "content/weekly/${KB_WEEK}.md" ] && [ "${{ inputs.force }}" != "true" ]; then
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-            echo "content/weekly/${KB_WEEK}.md 이(가) 이미 있어 건너뜀 (force 입력으로 강제 실행 가능)" >> "$GITHUB_STEP_SUMMARY"
-          fi
 
       - name: Build prompt
         if: steps.skip.outputs.skip != 'true'
