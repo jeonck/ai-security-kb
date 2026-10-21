@@ -7,6 +7,10 @@ on:
     - cron: "19 * * * *"   # 매시간 깨우고, 마지막 실제 실행이 5시간 안이면 건너뜀 (GitHub 크론 지연·누락 대비)
   workflow_dispatch:
     inputs:
+      guard:
+        description: "외부 깨우기용: 최근에 실제로 돌았으면 건너뜀 (사람이 누를 때는 끈 채로)"
+        type: boolean
+        default: false
       max_turns:
         description: "최대 턴 수"
         required: false
@@ -28,4 +32,5 @@ jobs:
       task: collect
       max_turns: ${{ fromJSON(inputs.max_turns || '200') }}
       min_gap_hours: 5
+      guarded: ${{ github.event_name == 'schedule' || inputs.guard == true }}
     secrets: inherit

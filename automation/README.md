@@ -20,7 +20,41 @@ GitHub은 크론 일정을 보장하지 않는다. 붐비면 몇 시간씩 늦�
 
 - 기준은 이 작업이 마지막으로 **실제로** 돈 시각이다. 실제로 돈 실행만 `kb-<작업>-<run id>` 아티팩트를 남기므로, 그 아티팩트의 생성 시각을 본다. 건너뛴 실행은 아티팩트를 남기지 않는다.
 - 수집은 마지막 실제 실행이 5시간 안이면 건너뛴다. 기초 문헌은 20시간, 주간 리포트는 72시간이 기준이다. 주간 리포트는 이번 주 파일이 이미 있어도 건너뛴다.
-- 건너뛰는 실행은 Claude를 부르지 않고 30초 안에 끝난다. 수동 실행은 이 검사를 하지 않는다.
+- 건너뛰는 실행은 Claude를 부르지 않고 30초 안에 끝난다. 사람이 누른 수동 실행은 이 검사를 하지 않는다. 수동 실행에서 `guard`를 켜면 검사를 한다. 외부 타이머는 이 방식으로 부른다.
+
+### 외부 타이머로 깨우기 (권장)
+
+GitHub 크론을 자주 깨워도 몇 시간씩 밀릴 수 있다. 그래서 GitHub 밖의 타이머가 정해진 시각에 워크플로를 한 번 더 깨우게 한다. 이렇게 하면 알람이 두 개가 된다. 먼저 울린 쪽이 실제로 돌고, 나중에 울린 쪽은 "최근에 이미 돌았다"며 30초 안에 끝난다. 외부 타이머는 `guard=true` 입력으로 수동 실행 API를 부르므로 건너뛰기 검사를 똑같이 받는다.
+
+**1. 토큰 만들기 (GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token)**
+
+- Repository access: Only select repositories → `jeonck/ai-security-kb`
+- Permissions → Repository permissions → **Actions: Read and write** (Metadata: Read는 자동). 다른 권한은 주지 않는다
+- Expiration: 90일~1년. 만료 전에 새로 만들어 타이머에 바꿔 넣는다
+- 이 토큰으로 할 수 있는 일은 이 레포의 워크플로 실행·취소·로그 보기다. 코드를 푸시할 수는 없다
+
+**2. 시험 호출** (204가 돌아오면 성공, Actions 탭에 KB collect 실행이 생긴다)
+
+```bash
+curl -i -X POST \
+  -H "Authorization: Bearer <토큰>" \
+  -H "Accept: application/vnd.github+json" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  https://api.github.com/repos/jeonck/ai-security-kb/actions/workflows/kb-collect.yml/dispatches \
+  -d '{"ref":"main","inputs":{"guard":"true"}}'
+```
+
+**3. 외부 타이머 등록** (예: cron-job.org 같은 무료 HTTP 크론 서비스, 또는 늘 켜져 있는 서버의 crontab + 위 curl)
+
+| 작업 | URL 끝부분 | 시각 (시간대 America/Chicago) |
+|---|---|---|
+| 수집 | `/actions/workflows/kb-collect.yml/dispatches` | 매시간 :49 (GitHub 크론 :19보다 30분 뒤) |
+| 기초 문헌 | `/actions/workflows/kb-foundation.yml/dispatches` | 화·금 10:30 |
+| 주간 리포트 | `/actions/workflows/kb-weekly.yml/dispatches` | 월 08:30 |
+
+- 세 작업 모두 방식은 POST다. 헤더는 위 curl과 같고, 본문은 `{"ref":"main","inputs":{"guard":"true"}}`이다.
+- 타이머 서비스에서 시간대를 America/Chicago로 두면 서머타임 전환도 알아서 맞춰진다.
+- 토큰은 외부 서비스에 저장된다. 만료일을 두고, 새어 나갔다고 의심되면 GitHub에서 바로 폐기한다.
 
 ## 한 번의 실행은 이렇게 흐른다
 

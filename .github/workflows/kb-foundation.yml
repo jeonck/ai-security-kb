@@ -7,6 +7,10 @@ on:
     - cron: "45 14,15,16,17 * * 2,5"   # 화·금 네 번 깨우고, 첫 실제 실행 뒤에는 건너뜀
   workflow_dispatch:
     inputs:
+      guard:
+        description: "외부 깨우기용: 최근에 실제로 돌았으면 건너뜀 (사람이 누를 때는 끈 채로)"
+        type: boolean
+        default: false
       max_turns:
         description: "최대 턴 수"
         required: false
@@ -28,4 +32,5 @@ jobs:
       task: foundation
       max_turns: ${{ fromJSON(inputs.max_turns || '150') }}
       min_gap_hours: 20
+      guarded: ${{ github.event_name == 'schedule' || inputs.guard == true }}
     secrets: inherit

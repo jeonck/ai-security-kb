@@ -8,6 +8,10 @@ on:
     - cron: "44 12,13,14,15,16 * * 1"   # 월요일 다섯 번 깨우고, 이번 주 리포트가 생기면 건너뜀
   workflow_dispatch:
     inputs:
+      guard:
+        description: "외부 깨우기용: 최근에 실제로 돌았으면 건너뜀 (사람이 누를 때는 끈 채로)"
+        type: boolean
+        default: false
       force:
         description: "이번 주 리포트가 이미 있어도 실행 (<주차>-2.md로 저장)"
         type: boolean
@@ -34,4 +38,5 @@ jobs:
       max_turns: ${{ fromJSON(inputs.max_turns || '300') }}
       force: ${{ inputs.force == true }}
       min_gap_hours: 72
+      guarded: ${{ github.event_name == 'schedule' || inputs.guard == true }}
     secrets: inherit
