@@ -1,0 +1,79 @@
+# 정시 알람: claude.ai 스케줄 작업이 kb-tick 브랜치에 "main + 빈 커밋"을 강제 푸시하면 몇 초 안에 이 워크플로가 뜬다.
+# (push 이벤트는 푸시된 커밋 안의 워크플로 파일을 쓰므로 kb-tick은 main을 바탕으로 만든다. 작업 자체는 main을 체크아웃해서 한다.)
+# GitHub 크론(schedule)은 몇 시간씩 밀릴 수 있지만 push 이벤트는 바로 온다.
+# 지금 시각(CT)에 맞는 작업을 고르고, 각 작업은 '최근 실제 실행' 검사를 켠 채 돈다 — 이미 돌았으면 30초 안에 끝난다.
+# 설명: automation/README.md "정시 알람 (claude.ai → kb-tick)"
+name: KB tick
+
+on:
+  push:
+    branches: [kb-tick]
+
+concurrency:
+  group: kb-content
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    if: vars.KB_AUTOMATION_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      weekly: ${{ steps.p.outputs.weekly }}
+      foundation: ${{ steps.p.outputs.foundation }}
+    steps:
+      - id: p
+        run: |
+          dow=$(TZ=America/Chicago date +%u)    # 1=월 … 7=일
+          hour=$(TZ=America/Chicago date +%H)
+          weekly=false; foundation=false
+          if [ "$dow" = 1 ] && [ "$hour" -ge 7 ]; then weekly=true; fi
+          if { [ "$dow" = 2 ] || [ "$dow" = 5 ]; } && [ "$hour" -ge 9 ]; then foundation=true; fi
+          echo "weekly=$weekly" >> "$GITHUB_OUTPUT"
+          echo "foundation=$foundation" >> "$GITHUB_OUTPUT"
+          echo "tick $(TZ=America/Chicago date '+%F %H:%M') CT — weekly=$weekly foundation=$foundation collect=true" >> "$GITHUB_STEP_SUMMARY"
+
+  # 한 레포에 동시에 커밋하지 않도록 주간 → 기초 문헌 → 수집 순서로 차례로 돈다.
+  weekly:
+    needs: plan
+    if: needs.plan.outputs.weekly == 'true'
+    permissions:
+      contents: write
+      actions: write
+      issues: write
+    uses: ./.github/workflows/kb-agent.yml
+    with:
+      task: weekly
+      max_turns: 300
+      min_gap_hours: 72
+      guarded: true
+    secrets: inherit
+
+  foundation:
+    needs: [plan, weekly]
+    if: always() && needs.plan.result == 'success' && needs.plan.outputs.foundation == 'true'
+    permissions:
+      contents: write
+      actions: write
+      issues: write
+    uses: ./.github/workflows/kb-agent.yml
+    with:
+      task: foundation
+      max_turns: 150
+      min_gap_hours: 20
+      guarded: true
+    secrets: inherit
+
+  collect:
+    needs: [plan, foundation]
+    if: always() && needs.plan.result == 'success'
+    permissions:
+      contents: write
+      actions: write
+      issues: write
+    uses: ./.github/workflows/kb-agent.yml
+    with:
+      task: collect
+      max_turns: 200
+      min_gap_hours: 5
+      guarded: true
+    secrets: inherit

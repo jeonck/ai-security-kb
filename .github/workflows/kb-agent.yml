@@ -46,6 +46,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: main        # kb-tick 브랜치 푸시로 깨어나도 작업은 언제나 main에서 한다
           fetch-depth: 0
 
       # GitHub 크론은 늦거나 건너뛸 수 있어서 일정은 자주 깨우고, 여기서 실제로 돌지 정한다.
