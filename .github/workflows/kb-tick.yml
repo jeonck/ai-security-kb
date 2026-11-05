@@ -8,6 +8,7 @@ name: KB tick
 on:
   push:
     branches: [kb-tick]
+  workflow_dispatch:      # 알람은 강제 푸시 대신 이 트리거를 API로 호출한다 (main에서 실행)
 
 concurrency:
   group: kb-content
