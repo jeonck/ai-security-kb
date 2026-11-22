@@ -3,8 +3,8 @@
 name: KB foundation
 
 on:
-  schedule:
-    - cron: "45 14,15,16,17 * * 2,5"   # 화·금 네 번 깨우고, 첫 실제 실행 뒤에는 건너뜀
+  # schedule:
+    # - cron: "45 14,15,16,17 * * 2,5"   # 화·금 네 번 깨우고, 첫 실제 실행 뒤에는 건너뜀
   workflow_dispatch:
     inputs:
       guard:
