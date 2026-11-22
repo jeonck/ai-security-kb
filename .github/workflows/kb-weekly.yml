@@ -4,8 +4,8 @@
 name: KB weekly
 
 on:
-  schedule:
-    - cron: "44 12,13,14,15,16 * * 1"   # 월요일 다섯 번 깨우고, 이번 주 리포트가 생기면 건너뜀
+  # schedule:
+    # - cron: "44 12,13,14,15,16 * * 1"   # 월요일 다섯 번 깨우고, 이번 주 리포트가 생기면 건너뜀
   workflow_dispatch:
     inputs:
       guard:
