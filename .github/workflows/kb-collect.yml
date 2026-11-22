@@ -3,8 +3,8 @@
 name: KB collect
 
 on:
-  schedule:
-    - cron: "19 * * * *"   # 매시간 깨우고, 마지막 실제 실행이 5시간 안이면 건너뜀 (GitHub 크론 지연·누락 대비)
+  # schedule:
+    # - cron: "19 * * * *"   # 매시간 깨우고, 마지막 실제 실행이 5시간 안이면 건너뜀 (GitHub 크론 지연·누락 대비)
   workflow_dispatch:
     inputs:
       guard:
